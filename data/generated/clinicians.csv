@@ -1,0 +1,395 @@
+clinician_id,clinician_code,provider_id,role,specialty,grade_band,sex,ethnicity_ons,fte,start_date,end_date,is_active
+1,CLN000001,1,Physiotherapist,Cardiology,GP Partner,F,Other,0.5,2011-12-24,,True
+2,CLN000002,1,Consultant,Diabetes,Band 7,M,Mixed,0.65,2018-05-26,2021-09-12,False
+3,CLN000003,1,Consultant,Radiology,GP Partner,M,White,0.52,2022-03-21,,True
+4,CLN000004,1,Radiologist,Primary Care,Band 8a,F,White,0.99,2022-04-20,,True
+5,CLN000005,1,Physiotherapist,Primary Care,Band 7,F,Black,0.67,2020-04-06,2021-07-18,False
+6,CLN000006,1,Radiologist,Radiology,Consultant,M,White,0.87,2009-01-25,,True
+7,CLN000007,1,Radiologist,Geriatrics,Band 6,F,White,0.57,2021-02-20,,True
+8,CLN000008,1,Radiologist,Diabetes,Band 5,F,White,0.91,2018-07-08,,True
+9,CLN000009,1,Registrar,Diabetes,Band 6,M,White,0.82,2014-03-27,,True
+10,CLN000010,1,Registrar,Mental Health,Band 6,F,White,0.47,2015-05-09,,True
+11,CLN000011,1,Registrar,Primary Care,Band 8a,F,White,0.86,2011-12-19,,True
+12,CLN000012,1,Consultant,Primary Care,Band 5,M,White,0.98,2008-11-07,,True
+13,CLN000013,1,Consultant,Physiotherapy,GP Partner,F,White,0.51,2014-01-13,,True
+14,CLN000014,1,Staff Nurse,Radiology,Band 6,M,White,0.88,2021-02-18,,True
+15,CLN000015,1,Staff Nurse,Respiratory,Band 5,M,White,0.82,2019-05-09,,True
+16,CLN000016,1,Consultant,General Medicine,ST3,F,White,0.76,2009-08-23,,True
+17,CLN000017,1,Radiologist,Primary Care,ST3,M,White,0.74,2020-10-13,,True
+18,CLN000018,1,Physiotherapist,Cardiology,Band 8a,F,Mixed,0.94,2009-04-23,,True
+19,CLN000019,1,Physiotherapist,Geriatrics,Band 5,F,White,0.52,2010-09-04,2023-08-26,False
+20,CLN000020,1,Physiotherapist,Mental Health,ST3,F,Other,0.69,2015-05-07,,True
+21,CLN000021,1,Radiologist,Primary Care,ST3,F,White,0.77,2021-04-10,2023-02-11,False
+22,CLN000022,1,Physiotherapist,Cardiology,GP Partner,F,White,0.84,2014-07-01,,True
+23,CLN000023,1,Registrar,Primary Care,Band 5,F,White,0.67,2014-03-22,,True
+24,CLN000024,1,Physiotherapist,Primary Care,ST3,F,White,0.87,2008-05-05,2017-10-21,False
+25,CLN000025,1,Radiologist,Geriatrics,Band 8a,F,White,0.72,2019-01-05,,True
+26,CLN000026,1,Consultant,Respiratory,Consultant,M,White,0.67,2019-08-24,2023-10-13,False
+27,CLN000027,1,Physiotherapist,Cardiology,ST3,M,White,0.44,2010-02-26,,True
+28,CLN000028,1,Consultant,Physiotherapy,ST3,F,White,0.52,2013-01-25,2019-07-16,False
+29,CLN000029,1,Registrar,Diabetes,Band 7,F,White,0.43,2019-08-19,,True
+30,CLN000030,1,Physiotherapist,Diabetes,Consultant,M,White,0.83,2012-03-08,,True
+31,CLN000031,1,Staff Nurse,General Medicine,Band 5,M,White,0.88,2019-06-17,,True
+32,CLN000032,1,Registrar,Geriatrics,Band 7,M,White,0.61,2018-11-01,,True
+33,CLN000033,1,Registrar,Respiratory,Band 7,F,White,0.68,2015-04-12,,True
+34,CLN000034,1,Radiologist,Mental Health,Band 6,F,Black,0.67,2008-03-10,,True
+35,CLN000035,1,Registrar,General Medicine,Band 8a,F,White,0.46,2020-05-05,,True
+36,CLN000036,1,Consultant,Emergency Medicine,GP Partner,F,Black,0.59,2011-06-26,,True
+37,CLN000037,1,Physiotherapist,Physiotherapy,Band 8a,F,White,0.84,2015-10-11,,True
+38,CLN000038,1,Registrar,Radiology,GP Partner,F,White,0.91,2009-05-10,,True
+39,CLN000039,1,Registrar,Radiology,Band 6,M,White,0.92,2014-12-06,,True
+40,CLN000040,1,Radiologist,Diabetes,GP Partner,M,White,0.77,2011-02-20,,True
+41,CLN000041,1,Physiotherapist,Geriatrics,Band 5,F,White,0.76,2016-07-24,,True
+42,CLN000042,1,Radiologist,General Medicine,Band 5,M,White,0.68,2009-02-21,,True
+43,CLN000043,2,Consultant,Physiotherapy,ST3,F,White,0.47,2010-04-26,,True
+44,CLN000044,2,Radiologist,Diabetes,Band 6,M,White,0.73,2022-12-02,,True
+45,CLN000045,2,Physiotherapist,Diabetes,Band 8a,M,White,0.55,2020-06-23,,True
+46,CLN000046,2,Registrar,Geriatrics,ST3,F,White,0.85,2009-03-08,,True
+47,CLN000047,2,Registrar,Radiology,Band 8a,F,White,0.86,2012-06-24,,True
+48,CLN000048,2,Registrar,Respiratory,Consultant,M,White,0.79,2011-06-07,,True
+49,CLN000049,2,Staff Nurse,Primary Care,Band 6,M,White,0.81,2015-03-14,2019-12-26,False
+50,CLN000050,2,Registrar,Respiratory,Band 8a,M,White,0.9,2008-07-23,,True
+51,CLN000051,2,Registrar,Primary Care,Band 6,F,White,0.92,2011-11-11,,True
+52,CLN000052,2,Radiologist,Emergency Medicine,GP Partner,F,White,0.68,2009-10-22,,True
+53,CLN000053,2,Consultant,Mental Health,Band 7,M,Black,0.9,2020-08-02,,True
+54,CLN000054,2,Physiotherapist,Radiology,GP Partner,F,Mixed,0.42,2013-01-27,2018-02-01,False
+55,CLN000055,2,Staff Nurse,Geriatrics,GP Partner,F,White,0.63,2010-12-18,,True
+56,CLN000056,2,Registrar,Emergency Medicine,Band 8a,F,Mixed,0.76,2022-01-04,,True
+57,CLN000057,2,Staff Nurse,Radiology,Band 6,M,White,0.99,2022-02-03,,True
+58,CLN000058,2,Registrar,Respiratory,GP Partner,M,Black,0.56,2010-11-05,,True
+59,CLN000059,2,Staff Nurse,Emergency Medicine,Band 8a,F,White,0.73,2013-03-20,2014-12-18,False
+60,CLN000060,2,Registrar,Emergency Medicine,Band 8a,F,Black,0.75,2019-12-09,,True
+61,CLN000061,2,Radiologist,Emergency Medicine,Band 7,F,White,0.87,2017-05-04,,True
+62,CLN000062,2,Radiologist,General Medicine,ST3,F,White,0.61,2014-09-12,,True
+63,CLN000063,2,Radiologist,Emergency Medicine,Band 5,M,White,0.75,2020-10-22,,True
+64,CLN000064,2,Registrar,Diabetes,Band 5,M,White,0.44,2018-03-22,,True
+65,CLN000065,2,Radiologist,Primary Care,ST3,F,White,0.94,2012-03-09,,True
+66,CLN000066,2,Radiologist,General Medicine,Consultant,F,White,0.55,2008-01-23,,True
+67,CLN000067,2,Consultant,Diabetes,Band 5,M,White,0.83,2021-07-07,2023-12-10,False
+68,CLN000068,2,Staff Nurse,Geriatrics,Band 5,M,White,0.48,2009-11-26,2022-08-07,False
+69,CLN000069,2,Radiologist,Geriatrics,Band 6,F,White,0.51,2018-09-02,2020-10-05,False
+70,CLN000070,2,Radiologist,Mental Health,ST3,M,White,0.54,2010-02-18,,True
+71,CLN000071,2,Staff Nurse,Diabetes,ST3,F,White,0.41,2016-10-20,,True
+72,CLN000072,2,Physiotherapist,Primary Care,ST3,F,White,0.95,2013-01-20,2022-07-08,False
+73,CLN000073,2,Physiotherapist,Radiology,Band 6,F,White,0.94,2014-11-05,,True
+74,CLN000074,2,Consultant,Radiology,GP Partner,F,White,0.86,2008-02-08,,True
+75,CLN000075,2,Radiologist,General Medicine,GP Partner,M,White,0.64,2020-03-12,,True
+76,CLN000076,2,Consultant,Diabetes,Band 7,M,White,0.7,2011-02-21,,True
+77,CLN000077,2,Consultant,Mental Health,Band 8a,F,White,0.78,2010-07-19,,True
+78,CLN000078,2,Registrar,Cardiology,Consultant,M,White,0.57,2021-03-06,,True
+79,CLN000079,2,Registrar,Respiratory,ST3,F,White,0.53,2016-09-14,,True
+80,CLN000080,2,Registrar,Mental Health,Band 7,F,White,0.97,2013-10-01,,True
+81,CLN000081,2,Physiotherapist,Mental Health,Band 6,M,White,0.42,2021-03-01,,True
+82,CLN000082,2,Registrar,General Medicine,GP Partner,F,White,0.73,2008-05-24,,True
+83,CLN000083,2,Staff Nurse,Primary Care,GP Partner,F,White,0.82,2020-10-03,,True
+84,CLN000084,2,Radiologist,Diabetes,Band 5,F,Mixed,0.57,2011-02-21,,True
+85,CLN000085,3,Healthcare Assistant,Geriatrics,GP Partner,F,White,0.44,2017-05-20,,True
+86,CLN000086,3,GP Partner,Mental Health,Consultant,F,White,0.59,2009-10-12,,True
+87,CLN000087,3,Healthcare Assistant,Physiotherapy,Band 5,F,White,0.92,2022-08-01,,True
+88,CLN000088,3,Salaried GP,General Medicine,ST3,M,White,0.66,2011-04-11,,True
+89,CLN000089,3,Healthcare Assistant,Emergency Medicine,ST3,M,White,0.59,2017-07-21,,True
+90,CLN000090,3,Practice Nurse,Mental Health,ST3,M,White,0.98,2013-02-14,2016-02-18,False
+91,CLN000091,3,Healthcare Assistant,Radiology,Band 7,F,White,0.73,2016-12-27,,True
+92,CLN000092,3,GP Partner,Primary Care,Band 6,M,White,0.83,2012-12-09,,True
+93,CLN000093,3,Salaried GP,Diabetes,Band 5,M,White,0.97,2018-11-21,,True
+94,CLN000094,3,Healthcare Assistant,Emergency Medicine,ST3,M,White,0.47,2022-10-23,,True
+95,CLN000095,4,Healthcare Assistant,Radiology,Band 6,F,White,0.46,2013-09-21,,True
+96,CLN000096,4,Practice Nurse,Emergency Medicine,Band 8a,F,White,0.52,2021-02-06,,True
+97,CLN000097,4,Practice Nurse,Cardiology,Band 7,F,Asian,0.52,2010-03-08,2017-05-08,False
+98,CLN000098,4,Salaried GP,Diabetes,ST3,M,Asian,0.46,2014-04-20,2023-09-01,False
+99,CLN000099,4,Salaried GP,Radiology,Band 5,F,White,0.6,2008-12-24,,True
+100,CLN000100,4,GP Partner,General Medicine,Band 6,F,White,0.47,2020-07-04,2023-08-16,False
+101,CLN000101,4,Healthcare Assistant,Mental Health,ST3,F,White,0.97,2017-11-02,,True
+102,CLN000102,4,Practice Nurse,General Medicine,GP Partner,F,White,0.42,2012-10-05,2022-02-17,False
+103,CLN000103,4,GP Partner,Radiology,ST3,M,White,0.61,2019-05-20,,True
+104,CLN000104,4,GP Partner,Radiology,Band 6,F,White,0.88,2018-11-13,,True
+105,CLN000105,5,Salaried GP,General Medicine,ST3,M,White,0.56,2017-09-04,,True
+106,CLN000106,5,Salaried GP,Cardiology,ST3,F,Mixed,0.71,2019-12-05,,True
+107,CLN000107,5,Practice Nurse,Geriatrics,GP Partner,M,White,0.87,2020-05-19,,True
+108,CLN000108,5,Practice Nurse,Primary Care,Consultant,F,White,0.73,2014-02-03,,True
+109,CLN000109,5,Salaried GP,Radiology,Band 6,M,White,0.44,2019-06-17,,True
+110,CLN000110,5,Healthcare Assistant,Mental Health,Band 6,F,White,0.41,2012-05-03,,True
+111,CLN000111,5,Practice Nurse,Physiotherapy,Band 6,F,Black,0.84,2015-11-04,,True
+112,CLN000112,5,GP Partner,General Medicine,Consultant,F,White,0.64,2015-01-03,,True
+113,CLN000113,5,Healthcare Assistant,General Medicine,Band 7,F,White,0.64,2022-04-16,,True
+114,CLN000114,5,Practice Nurse,Geriatrics,Consultant,M,White,0.98,2009-09-05,2014-06-19,False
+115,CLN000115,6,GP Partner,General Medicine,ST3,M,Asian,0.89,2022-10-10,,True
+116,CLN000116,6,Healthcare Assistant,Primary Care,GP Partner,F,White,0.7,2017-07-21,,True
+117,CLN000117,6,Healthcare Assistant,Mental Health,GP Partner,M,White,0.98,2015-10-05,,True
+118,CLN000118,6,Healthcare Assistant,Primary Care,Band 7,F,White,0.41,2015-06-12,2016-09-10,False
+119,CLN000119,6,Salaried GP,Radiology,Band 8a,M,Asian,0.63,2017-09-07,,True
+120,CLN000120,6,Practice Nurse,Cardiology,ST3,F,White,0.54,2009-09-12,,True
+121,CLN000121,6,GP Partner,Radiology,Band 7,F,White,0.42,2022-02-22,,True
+122,CLN000122,6,GP Partner,Physiotherapy,Band 7,F,White,0.65,2016-07-27,,True
+123,CLN000123,6,Healthcare Assistant,Cardiology,Consultant,M,White,0.66,2022-04-20,,True
+124,CLN000124,6,Salaried GP,Emergency Medicine,Consultant,F,White,0.97,2010-07-03,2016-08-26,False
+125,CLN000125,7,Practice Nurse,Cardiology,Band 8a,F,White,0.42,2011-04-23,,True
+126,CLN000126,7,Healthcare Assistant,Emergency Medicine,Consultant,F,White,0.55,2016-07-25,,True
+127,CLN000127,7,Practice Nurse,Diabetes,Band 7,F,Asian,0.57,2018-09-23,2021-03-22,False
+128,CLN000128,7,Salaried GP,Physiotherapy,Band 5,F,White,0.84,2012-04-01,,True
+129,CLN000129,7,Salaried GP,Geriatrics,Band 8a,F,Asian,0.79,2021-02-04,,True
+130,CLN000130,7,GP Partner,Primary Care,Band 8a,F,Black,0.63,2013-10-10,,True
+131,CLN000131,7,GP Partner,Emergency Medicine,ST3,F,White,0.47,2010-03-12,,True
+132,CLN000132,7,Practice Nurse,Respiratory,Band 7,F,White,0.94,2010-06-13,,True
+133,CLN000133,7,Practice Nurse,Radiology,Band 7,F,White,0.89,2008-12-15,,True
+134,CLN000134,7,Salaried GP,Mental Health,Band 8a,M,Black,0.57,2013-09-14,,True
+135,CLN000135,8,Salaried GP,Physiotherapy,Band 8a,M,White,0.68,2013-01-18,,True
+136,CLN000136,8,Healthcare Assistant,General Medicine,Band 7,M,White,0.88,2011-01-26,,True
+137,CLN000137,8,Healthcare Assistant,Cardiology,Consultant,F,White,0.6,2010-03-07,,True
+138,CLN000138,8,GP Partner,General Medicine,Band 5,F,White,0.79,2020-05-12,,True
+139,CLN000139,8,GP Partner,Primary Care,Consultant,F,White,0.84,2011-03-20,,True
+140,CLN000140,8,GP Partner,Primary Care,Band 7,M,Black,0.78,2021-02-09,,True
+141,CLN000141,8,Healthcare Assistant,Emergency Medicine,ST3,M,White,0.81,2010-01-19,,True
+142,CLN000142,8,Salaried GP,General Medicine,GP Partner,F,Black,0.58,2013-11-21,,True
+143,CLN000143,8,GP Partner,Geriatrics,Band 5,M,Other,0.65,2015-08-13,2022-11-05,False
+144,CLN000144,8,Practice Nurse,Physiotherapy,ST3,F,Black,0.83,2008-04-07,,True
+145,CLN000145,9,Practice Nurse,Cardiology,GP Partner,F,White,0.97,2010-07-23,,True
+146,CLN000146,9,Salaried GP,Geriatrics,Consultant,F,White,0.62,2016-03-19,2020-07-15,False
+147,CLN000147,9,Practice Nurse,Radiology,Band 5,F,White,0.41,2011-05-15,,True
+148,CLN000148,9,Salaried GP,Mental Health,Band 6,F,White,0.42,2020-09-15,,True
+149,CLN000149,9,Salaried GP,Geriatrics,Band 7,M,White,0.64,2011-04-06,,True
+150,CLN000150,9,GP Partner,Respiratory,Band 6,F,Black,0.84,2019-02-24,2022-10-07,False
+151,CLN000151,9,Salaried GP,Cardiology,Band 8a,F,Asian,0.74,2010-05-02,,True
+152,CLN000152,9,Healthcare Assistant,Mental Health,Band 8a,M,White,0.78,2021-06-24,2022-09-03,False
+153,CLN000153,9,Practice Nurse,Primary Care,Band 5,M,Mixed,0.73,2012-05-05,,True
+154,CLN000154,9,Salaried GP,Physiotherapy,Consultant,F,White,0.61,2008-08-09,,True
+155,CLN000155,10,Healthcare Assistant,Geriatrics,Band 8a,F,White,0.76,2015-04-14,,True
+156,CLN000156,10,Practice Nurse,Diabetes,Band 7,M,Other,0.77,2008-01-19,,True
+157,CLN000157,10,Salaried GP,Diabetes,Band 8a,F,Asian,0.48,2009-07-02,,True
+158,CLN000158,10,Healthcare Assistant,Cardiology,Band 7,M,White,0.79,2014-05-02,2023-07-06,False
+159,CLN000159,10,Healthcare Assistant,Radiology,Band 8a,F,White,0.96,2018-11-18,,True
+160,CLN000160,10,Healthcare Assistant,Physiotherapy,ST3,M,White,0.68,2012-07-26,,True
+161,CLN000161,10,Salaried GP,Mental Health,Band 8a,M,White,0.59,2011-12-03,,True
+162,CLN000162,10,GP Partner,Emergency Medicine,ST3,F,White,0.66,2008-09-04,,True
+163,CLN000163,10,GP Partner,Diabetes,Consultant,M,White,0.71,2019-06-05,,True
+164,CLN000164,10,Practice Nurse,Radiology,ST3,F,White,0.66,2017-11-21,,True
+165,CLN000165,11,Salaried GP,Respiratory,Band 6,F,White,0.63,2015-02-20,,True
+166,CLN000166,11,GP Partner,Diabetes,Consultant,M,White,0.75,2021-10-14,,True
+167,CLN000167,11,Salaried GP,Emergency Medicine,Band 7,M,White,1.0,2011-04-14,,True
+168,CLN000168,11,Healthcare Assistant,Radiology,Band 6,M,White,0.86,2020-01-26,2023-11-15,False
+169,CLN000169,11,Practice Nurse,Radiology,GP Partner,F,White,0.76,2017-10-02,,True
+170,CLN000170,11,Healthcare Assistant,Cardiology,ST3,M,White,0.78,2015-04-11,2016-02-12,False
+171,CLN000171,11,Salaried GP,Primary Care,ST3,M,White,0.49,2016-03-05,,True
+172,CLN000172,11,Healthcare Assistant,Radiology,Band 7,M,Asian,0.73,2015-04-23,2021-01-25,False
+173,CLN000173,11,Practice Nurse,Primary Care,GP Partner,M,White,0.77,2020-07-27,2022-05-21,False
+174,CLN000174,11,GP Partner,Geriatrics,ST3,F,White,0.95,2013-09-22,,True
+175,CLN000175,12,Healthcare Assistant,Cardiology,GP Partner,M,Asian,0.49,2014-10-02,,True
+176,CLN000176,12,Salaried GP,Primary Care,Band 8a,F,White,0.91,2012-03-17,2023-09-27,False
+177,CLN000177,12,Salaried GP,Mental Health,Band 6,M,White,0.63,2010-09-12,,True
+178,CLN000178,12,Practice Nurse,Diabetes,ST3,M,White,0.59,2008-08-04,,True
+179,CLN000179,12,GP Partner,Diabetes,Band 8a,M,Black,0.75,2018-02-08,,True
+180,CLN000180,12,Salaried GP,Primary Care,Band 5,F,White,0.6,2021-02-13,,True
+181,CLN000181,12,Salaried GP,Geriatrics,Consultant,M,Black,0.53,2010-08-19,,True
+182,CLN000182,12,Healthcare Assistant,Physiotherapy,Band 8a,F,White,0.49,2008-10-19,,True
+183,CLN000183,12,Practice Nurse,Primary Care,Band 7,F,White,0.48,2010-02-27,,True
+184,CLN000184,12,Healthcare Assistant,Cardiology,Band 7,F,White,0.76,2008-10-21,,True
+185,CLN000185,13,Healthcare Assistant,Cardiology,Band 5,F,Other,0.54,2011-03-01,2022-01-10,False
+186,CLN000186,13,Salaried GP,Geriatrics,Consultant,M,White,0.44,2018-05-25,,True
+187,CLN000187,13,Healthcare Assistant,Emergency Medicine,ST3,F,White,0.91,2015-09-21,2019-04-17,False
+188,CLN000188,13,Healthcare Assistant,Mental Health,GP Partner,M,White,0.45,2008-11-02,,True
+189,CLN000189,13,GP Partner,General Medicine,Band 8a,M,White,0.46,2021-07-25,,True
+190,CLN000190,13,GP Partner,Emergency Medicine,GP Partner,M,Mixed,0.91,2013-08-25,,True
+191,CLN000191,13,GP Partner,Cardiology,Consultant,F,Mixed,0.91,2021-04-13,,True
+192,CLN000192,13,Healthcare Assistant,Radiology,Band 8a,F,Other,0.71,2015-01-08,,True
+193,CLN000193,13,Salaried GP,Mental Health,ST3,M,White,0.8,2018-04-04,,True
+194,CLN000194,13,Healthcare Assistant,General Medicine,Band 6,M,Other,0.62,2011-10-14,,True
+195,CLN000195,14,GP Partner,Diabetes,GP Partner,M,White,0.91,2017-01-07,,True
+196,CLN000196,14,GP Partner,Radiology,Band 7,F,White,0.75,2010-10-25,,True
+197,CLN000197,14,Salaried GP,Emergency Medicine,ST3,F,Asian,0.42,2019-12-20,,True
+198,CLN000198,14,Healthcare Assistant,Emergency Medicine,ST3,F,White,0.93,2015-11-23,2016-01-23,False
+199,CLN000199,14,Salaried GP,Primary Care,GP Partner,M,White,0.87,2013-09-03,,True
+200,CLN000200,14,Salaried GP,Primary Care,Band 5,M,White,0.94,2019-02-02,,True
+201,CLN000201,14,GP Partner,Mental Health,Band 6,F,White,0.44,2013-10-24,,True
+202,CLN000202,14,Practice Nurse,Mental Health,Consultant,M,Other,0.79,2020-10-25,,True
+203,CLN000203,14,GP Partner,Physiotherapy,Band 8a,M,White,0.82,2014-02-02,,True
+204,CLN000204,14,Salaried GP,Geriatrics,ST3,F,White,0.72,2019-08-26,,True
+205,CLN000205,15,Salaried GP,General Medicine,ST3,F,White,0.96,2014-07-21,,True
+206,CLN000206,15,Practice Nurse,Radiology,Band 5,M,Mixed,0.83,2013-04-10,,True
+207,CLN000207,15,Salaried GP,Mental Health,GP Partner,M,White,0.7,2022-02-02,,True
+208,CLN000208,15,GP Partner,Geriatrics,ST3,F,White,0.74,2009-03-20,,True
+209,CLN000209,15,GP Partner,Physiotherapy,Band 7,M,White,0.73,2015-10-12,,True
+210,CLN000210,15,GP Partner,Diabetes,Band 7,F,White,0.53,2020-01-27,,True
+211,CLN000211,15,Healthcare Assistant,Mental Health,Band 6,F,White,0.59,2011-04-03,,True
+212,CLN000212,15,GP Partner,Primary Care,Band 6,M,Black,0.92,2008-12-15,,True
+213,CLN000213,15,Practice Nurse,Mental Health,GP Partner,F,Other,0.54,2022-08-14,,True
+214,CLN000214,15,GP Partner,Emergency Medicine,ST3,F,White,0.81,2013-04-03,,True
+215,CLN000215,16,Practice Nurse,Geriatrics,Band 8a,M,White,0.67,2022-02-24,,True
+216,CLN000216,16,Salaried GP,Emergency Medicine,GP Partner,M,White,0.93,2013-10-26,,True
+217,CLN000217,16,Healthcare Assistant,Diabetes,Consultant,M,Asian,0.93,2022-02-07,,True
+218,CLN000218,16,Salaried GP,Mental Health,Band 5,F,White,0.63,2022-02-11,2023-01-09,False
+219,CLN000219,16,GP Partner,Respiratory,Band 6,F,Asian,0.54,2009-08-07,,True
+220,CLN000220,16,Healthcare Assistant,Mental Health,ST3,F,White,0.63,2008-06-13,,True
+221,CLN000221,16,Practice Nurse,Geriatrics,GP Partner,F,Black,0.65,2019-10-01,,True
+222,CLN000222,16,GP Partner,General Medicine,Band 7,M,Other,0.94,2008-08-19,,True
+223,CLN000223,16,Healthcare Assistant,Geriatrics,ST3,M,Black,0.7,2021-08-23,,True
+224,CLN000224,16,Salaried GP,General Medicine,Band 8a,F,White,0.63,2010-11-09,,True
+225,CLN000225,17,Healthcare Assistant,Physiotherapy,Consultant,F,White,0.9,2016-09-22,,True
+226,CLN000226,17,Practice Nurse,Physiotherapy,Band 7,M,White,0.91,2011-05-08,,True
+227,CLN000227,17,Healthcare Assistant,Physiotherapy,Band 5,F,Asian,0.92,2017-05-16,,True
+228,CLN000228,17,Healthcare Assistant,Cardiology,Consultant,F,White,0.62,2010-12-25,,True
+229,CLN000229,17,Practice Nurse,General Medicine,Band 7,F,White,0.76,2009-09-20,,True
+230,CLN000230,17,Healthcare Assistant,Primary Care,Band 6,M,White,0.6,2014-09-01,2017-05-21,False
+231,CLN000231,17,Practice Nurse,General Medicine,Band 6,F,Asian,0.99,2010-04-12,,True
+232,CLN000232,17,Healthcare Assistant,Cardiology,Consultant,M,Black,0.75,2013-08-02,,True
+233,CLN000233,17,Salaried GP,Mental Health,ST3,M,White,0.45,2015-10-11,,True
+234,CLN000234,17,Practice Nurse,Respiratory,GP Partner,M,White,0.85,2021-06-18,,True
+235,CLN000235,18,Psychologist,Respiratory,ST3,F,White,0.85,2013-09-04,,True
+236,CLN000236,18,Occupational Therapist,Respiratory,Band 8a,F,White,0.93,2018-08-18,2021-06-07,False
+237,CLN000237,18,Community Nurse,Radiology,Band 8a,M,White,0.97,2009-05-15,,True
+238,CLN000238,18,Occupational Therapist,Cardiology,ST3,M,White,0.79,2011-05-01,,True
+239,CLN000239,18,Psychologist,Primary Care,Band 5,F,Mixed,0.57,2008-11-23,,True
+240,CLN000240,18,Physiotherapist,Primary Care,Consultant,M,White,0.42,2021-11-02,,True
+241,CLN000241,18,Psychologist,Cardiology,Band 7,M,White,0.6,2013-10-17,,True
+242,CLN000242,18,Physiotherapist,Emergency Medicine,Consultant,M,White,0.64,2013-10-22,,True
+243,CLN000243,18,Physiotherapist,Mental Health,Band 7,M,White,0.96,2010-07-15,,True
+244,CLN000244,18,Community Nurse,Physiotherapy,Band 7,M,White,0.67,2015-06-18,,True
+245,CLN000245,18,Community Nurse,Radiology,Band 8a,F,White,0.55,2017-02-02,,True
+246,CLN000246,18,Psychologist,Primary Care,Band 5,F,Asian,0.76,2012-01-07,,True
+247,CLN000247,18,Community Nurse,Diabetes,Band 8a,F,White,0.88,2017-09-15,,True
+248,CLN000248,18,Community Nurse,Emergency Medicine,Consultant,F,White,0.8,2022-07-03,,True
+249,CLN000249,18,Physiotherapist,General Medicine,Band 6,F,Black,0.95,2014-05-02,,True
+250,CLN000250,18,Physiotherapist,Emergency Medicine,Band 8a,F,Black,0.49,2021-10-02,,True
+251,CLN000251,18,Occupational Therapist,Respiratory,Band 8a,M,White,0.88,2018-06-21,,True
+252,CLN000252,19,Physiotherapist,Physiotherapy,Consultant,M,Black,0.97,2016-10-25,,True
+253,CLN000253,19,Psychologist,Radiology,ST3,M,White,0.73,2017-09-22,,True
+254,CLN000254,19,Occupational Therapist,General Medicine,Band 8a,M,White,0.98,2010-03-12,,True
+255,CLN000255,19,Community Nurse,Physiotherapy,Consultant,F,White,0.96,2016-06-20,2017-06-26,False
+256,CLN000256,19,Community Nurse,General Medicine,Band 6,M,White,0.88,2009-12-23,,True
+257,CLN000257,19,Community Nurse,Primary Care,Band 5,M,Other,0.48,2014-04-26,,True
+258,CLN000258,19,Physiotherapist,General Medicine,GP Partner,F,White,0.91,2019-10-18,2022-12-06,False
+259,CLN000259,19,Occupational Therapist,Physiotherapy,Band 8a,F,White,0.4,2013-03-07,,True
+260,CLN000260,19,Community Nurse,Radiology,GP Partner,F,White,0.74,2016-07-22,,True
+261,CLN000261,19,Occupational Therapist,Mental Health,Band 5,M,White,0.52,2022-10-19,,True
+262,CLN000262,19,Psychologist,Mental Health,Band 5,F,Other,0.6,2012-02-18,,True
+263,CLN000263,19,Physiotherapist,Physiotherapy,Band 8a,M,Asian,0.81,2008-04-21,2010-12-22,False
+264,CLN000264,19,Community Nurse,Radiology,Band 5,F,White,0.5,2020-05-13,,True
+265,CLN000265,19,Psychologist,Cardiology,Consultant,F,White,0.73,2014-07-04,,True
+266,CLN000266,19,Occupational Therapist,Radiology,Band 8a,M,White,0.77,2008-02-04,2014-04-09,False
+267,CLN000267,19,Community Nurse,Geriatrics,Band 7,M,White,0.85,2019-02-08,,True
+268,CLN000268,19,Occupational Therapist,Respiratory,Band 7,F,Asian,0.74,2022-03-20,,True
+269,CLN000269,20,Physiotherapist,Geriatrics,Band 7,F,White,0.81,2019-05-22,,True
+270,CLN000270,20,Community Nurse,Radiology,Band 8a,M,White,0.87,2015-04-02,,True
+271,CLN000271,20,Psychologist,Physiotherapy,GP Partner,F,White,0.73,2015-11-23,,True
+272,CLN000272,20,Community Nurse,Physiotherapy,GP Partner,M,White,0.5,2013-08-23,2017-12-16,False
+273,CLN000273,20,Physiotherapist,Geriatrics,Consultant,F,White,0.73,2008-12-13,,True
+274,CLN000274,20,Physiotherapist,Primary Care,Consultant,F,Black,0.94,2009-01-12,2018-12-03,False
+275,CLN000275,20,Occupational Therapist,Respiratory,GP Partner,F,Other,0.85,2014-12-07,,True
+276,CLN000276,20,Occupational Therapist,Emergency Medicine,Band 6,F,Asian,0.68,2011-08-06,,True
+277,CLN000277,20,Physiotherapist,Diabetes,Band 5,M,White,0.71,2017-12-25,,True
+278,CLN000278,20,Physiotherapist,Primary Care,Band 6,F,Other,0.64,2016-09-03,2022-01-26,False
+279,CLN000279,20,Occupational Therapist,Mental Health,Band 6,F,White,0.74,2012-06-19,,True
+280,CLN000280,20,Psychologist,Cardiology,Band 6,M,White,0.64,2018-08-24,2022-09-06,False
+281,CLN000281,20,Community Nurse,Radiology,ST3,F,White,0.66,2013-08-16,,True
+282,CLN000282,20,Occupational Therapist,Mental Health,Consultant,F,White,0.71,2012-03-24,2023-05-01,False
+283,CLN000283,20,Physiotherapist,Diabetes,Consultant,F,White,0.8,2019-09-03,,True
+284,CLN000284,20,Community Nurse,Mental Health,GP Partner,M,White,0.56,2008-07-20,,True
+285,CLN000285,20,Community Nurse,Diabetes,Band 8a,F,White,0.47,2019-11-19,,True
+286,CLN000286,21,Community Nurse,Mental Health,ST3,M,Black,0.45,2022-01-15,2023-12-09,False
+287,CLN000287,21,Occupational Therapist,Geriatrics,Band 7,F,White,0.95,2015-11-23,,True
+288,CLN000288,21,Occupational Therapist,Radiology,Band 8a,F,Black,0.6,2014-11-23,,True
+289,CLN000289,21,Occupational Therapist,Emergency Medicine,Band 7,F,White,0.96,2012-04-06,2013-08-08,False
+290,CLN000290,21,Psychologist,Radiology,Consultant,F,White,0.4,2012-01-27,,True
+291,CLN000291,21,Community Nurse,Geriatrics,GP Partner,F,White,0.43,2022-06-16,,True
+292,CLN000292,21,Community Nurse,General Medicine,GP Partner,M,White,0.63,2022-05-27,2023-11-11,False
+293,CLN000293,21,Psychologist,Geriatrics,Band 7,M,White,0.66,2013-06-01,,True
+294,CLN000294,21,Physiotherapist,Geriatrics,ST3,M,White,0.61,2017-07-14,,True
+295,CLN000295,21,Psychologist,Geriatrics,GP Partner,M,White,0.53,2011-08-20,2015-07-06,False
+296,CLN000296,21,Occupational Therapist,Cardiology,Band 7,F,White,0.74,2021-08-17,,True
+297,CLN000297,21,Community Nurse,Primary Care,ST3,M,White,0.45,2017-02-26,2019-07-20,False
+298,CLN000298,21,Community Nurse,General Medicine,Band 5,F,Asian,0.45,2011-08-15,,True
+299,CLN000299,21,Community Nurse,General Medicine,Consultant,F,White,0.87,2012-12-16,,True
+300,CLN000300,21,Physiotherapist,Primary Care,Band 6,F,White,0.92,2019-10-23,,True
+301,CLN000301,21,Psychologist,Cardiology,Band 7,F,Mixed,0.98,2011-10-22,,True
+302,CLN000302,21,Occupational Therapist,Primary Care,ST3,M,White,0.49,2018-04-02,,True
+303,CLN000303,22,Paramedic,Cardiology,Band 6,M,White,0.45,2015-10-03,,True
+304,CLN000304,22,ED Doctor,Radiology,GP Partner,M,White,0.47,2020-08-01,,True
+305,CLN000305,22,Paramedic,General Medicine,Band 6,F,White,0.58,2022-02-11,2023-03-05,False
+306,CLN000306,22,Paramedic,Primary Care,GP Partner,F,White,0.59,2015-11-04,,True
+307,CLN000307,22,Paramedic,Primary Care,Consultant,F,White,0.88,2019-07-21,,True
+308,CLN000308,22,ED Doctor,Emergency Medicine,Band 8a,M,White,0.96,2015-11-02,2022-08-13,False
+309,CLN000309,22,ED Doctor,General Medicine,Band 5,M,White,0.51,2020-06-08,,True
+310,CLN000310,22,ED Nurse,Emergency Medicine,GP Partner,F,Other,0.54,2021-05-09,,True
+311,CLN000311,22,ED Doctor,Mental Health,ST3,F,White,0.78,2010-06-08,2012-10-08,False
+312,CLN000312,22,Paramedic,Physiotherapy,ST3,F,White,0.44,2019-12-01,,True
+313,CLN000313,22,ED Doctor,Respiratory,Band 7,M,White,0.46,2019-01-23,,True
+314,CLN000314,22,Paramedic,Respiratory,ST3,M,Black,0.5,2009-03-03,,True
+315,CLN000315,22,Paramedic,Radiology,ST3,F,White,0.91,2012-01-08,,True
+316,CLN000316,22,ED Nurse,Emergency Medicine,ST3,M,Black,0.56,2016-06-26,,True
+317,CLN000317,22,ED Doctor,Mental Health,Band 8a,F,White,0.61,2020-01-25,,True
+318,CLN000318,22,Paramedic,Mental Health,GP Partner,F,White,0.68,2018-10-16,,True
+319,CLN000319,22,ED Doctor,Geriatrics,Band 7,F,White,0.7,2011-04-13,,True
+320,CLN000320,22,Paramedic,Geriatrics,Band 7,M,White,0.94,2009-09-11,,True
+321,CLN000321,22,ED Doctor,Primary Care,Band 7,M,White,0.91,2009-08-14,,True
+322,CLN000322,22,ED Doctor,Emergency Medicine,ST3,M,Black,0.78,2016-09-12,2023-10-10,False
+323,CLN000323,22,Paramedic,Physiotherapy,Band 8a,F,White,0.5,2011-08-22,,True
+324,CLN000324,22,ED Doctor,Physiotherapy,Band 8a,M,White,0.7,2008-11-09,2023-07-26,False
+325,CLN000325,22,ED Doctor,Respiratory,ST3,M,White,0.52,2012-01-18,,True
+326,CLN000326,22,ED Nurse,Geriatrics,GP Partner,F,White,0.73,2018-09-24,,True
+327,CLN000327,22,Paramedic,Geriatrics,Band 7,F,Other,0.91,2020-04-08,,True
+328,CLN000328,23,ED Nurse,Radiology,Band 7,F,White,0.83,2011-09-02,,True
+329,CLN000329,23,ED Doctor,Physiotherapy,Band 7,F,White,0.48,2022-06-08,,True
+330,CLN000330,23,ED Nurse,Mental Health,Band 5,M,White,0.98,2016-09-16,,True
+331,CLN000331,23,ED Doctor,Cardiology,GP Partner,F,White,0.42,2010-02-03,,True
+332,CLN000332,23,ED Nurse,Cardiology,GP Partner,M,White,0.94,2011-07-27,,True
+333,CLN000333,23,Paramedic,Physiotherapy,ST3,F,White,0.81,2019-06-15,,True
+334,CLN000334,23,Paramedic,General Medicine,Consultant,M,White,0.62,2010-03-08,,True
+335,CLN000335,23,Paramedic,Mental Health,Band 8a,M,White,0.46,2008-04-15,,True
+336,CLN000336,23,ED Doctor,Primary Care,Band 6,F,White,0.51,2018-07-19,2021-03-15,False
+337,CLN000337,23,ED Nurse,Diabetes,Band 8a,F,Asian,0.45,2017-01-18,,True
+338,CLN000338,23,Paramedic,Radiology,Band 5,F,White,0.73,2014-08-14,,True
+339,CLN000339,23,ED Doctor,Geriatrics,Band 6,F,White,0.95,2020-02-10,,True
+340,CLN000340,23,ED Doctor,Cardiology,Band 6,M,White,0.59,2018-09-02,,True
+341,CLN000341,23,Paramedic,Cardiology,Band 8a,M,White,0.8,2017-12-22,,True
+342,CLN000342,23,ED Doctor,Mental Health,Band 8a,F,White,0.57,2019-12-14,,True
+343,CLN000343,23,ED Doctor,Primary Care,ST3,F,White,0.45,2013-07-20,,True
+344,CLN000344,23,ED Nurse,Physiotherapy,Band 7,M,White,0.76,2020-04-24,,True
+345,CLN000345,23,ED Nurse,Respiratory,Band 6,M,Other,0.78,2008-01-02,,True
+346,CLN000346,23,ED Doctor,Emergency Medicine,ST3,F,White,0.67,2011-07-03,,True
+347,CLN000347,23,ED Doctor,Primary Care,Band 8a,F,Mixed,0.82,2022-11-09,,True
+348,CLN000348,23,ED Nurse,Diabetes,Band 8a,F,White,0.62,2012-06-17,2019-02-21,False
+349,CLN000349,23,Paramedic,Physiotherapy,Consultant,F,White,0.69,2013-05-18,,True
+350,CLN000350,23,ED Nurse,Respiratory,Consultant,F,White,0.74,2010-05-18,,True
+351,CLN000351,23,ED Doctor,Primary Care,Consultant,F,White,0.78,2017-03-16,,True
+352,CLN000352,23,ED Nurse,Respiratory,Band 7,M,White,0.7,2011-07-19,,True
+353,CLN000353,24,Radiographer,Physiotherapy,Band 8a,F,Asian,0.64,2020-04-19,,True
+354,CLN000354,24,Radiographer,Emergency Medicine,Band 8a,M,White,0.99,2018-02-03,,True
+355,CLN000355,24,Sonographer,Mental Health,ST3,F,Black,0.65,2016-10-04,,True
+356,CLN000356,24,Radiographer,Diabetes,GP Partner,M,White,0.98,2009-06-20,,True
+357,CLN000357,24,Sonographer,Emergency Medicine,Band 5,F,White,0.76,2022-02-03,,True
+358,CLN000358,24,Radiographer,Cardiology,Band 5,M,White,0.91,2021-02-21,,True
+359,CLN000359,24,Radiologist,General Medicine,Consultant,F,White,0.64,2012-10-11,,True
+360,CLN000360,24,Sonographer,General Medicine,Consultant,M,White,0.49,2022-07-20,,True
+361,CLN000361,24,Radiologist,Primary Care,Band 6,F,White,0.44,2012-01-26,,True
+362,CLN000362,24,Sonographer,Respiratory,Band 5,M,White,0.72,2009-02-04,,True
+363,CLN000363,24,Sonographer,Emergency Medicine,Band 5,M,White,0.9,2013-12-20,,True
+364,CLN000364,24,Radiographer,General Medicine,Band 6,F,White,0.69,2012-07-16,2022-03-25,False
+365,CLN000365,24,Radiologist,Cardiology,Consultant,M,Other,0.91,2012-01-09,,True
+366,CLN000366,24,Radiographer,Geriatrics,Band 6,F,White,0.91,2013-11-06,,True
+367,CLN000367,24,Sonographer,Emergency Medicine,Band 5,F,Asian,0.79,2010-09-21,,True
+368,CLN000368,24,Radiologist,General Medicine,Band 5,M,Black,0.54,2021-01-25,,True
+369,CLN000369,24,Radiographer,Respiratory,Band 8a,M,White,0.43,2015-09-23,,True
+370,CLN000370,24,Sonographer,Emergency Medicine,Consultant,F,White,0.58,2013-11-22,,True
+371,CLN000371,24,Sonographer,Emergency Medicine,ST3,M,Mixed,0.58,2022-01-11,,True
+372,CLN000372,24,Radiologist,Geriatrics,Consultant,F,White,0.86,2022-03-27,,True
+373,CLN000373,24,Radiologist,Cardiology,Band 6,M,Asian,0.71,2021-08-25,,True
+374,CLN000374,25,Radiographer,Mental Health,Band 5,M,White,0.82,2015-12-12,,True
+375,CLN000375,25,Sonographer,Diabetes,ST3,M,White,0.52,2013-01-21,,True
+376,CLN000376,25,Radiographer,Diabetes,Consultant,F,Mixed,0.62,2009-05-18,2020-09-22,False
+377,CLN000377,25,Sonographer,Cardiology,Band 8a,M,White,0.85,2009-08-03,,True
+378,CLN000378,25,Sonographer,Physiotherapy,Band 6,M,Black,0.53,2022-02-03,,True
+379,CLN000379,25,Radiologist,Diabetes,GP Partner,F,White,0.86,2014-12-14,,True
+380,CLN000380,25,Radiographer,Primary Care,Band 6,F,Mixed,0.64,2016-11-17,,True
+381,CLN000381,25,Radiologist,Cardiology,ST3,F,Other,0.67,2009-04-01,,True
+382,CLN000382,25,Radiographer,Respiratory,Band 7,M,White,0.87,2018-02-24,,True
+383,CLN000383,25,Radiologist,Physiotherapy,Band 8a,M,Other,0.65,2014-08-23,2021-10-19,False
+384,CLN000384,25,Radiographer,General Medicine,Band 5,M,White,0.5,2012-04-04,,True
+385,CLN000385,25,Sonographer,Diabetes,Consultant,F,White,0.78,2019-01-25,,True
+386,CLN000386,25,Radiographer,Mental Health,Band 5,M,White,0.48,2016-09-06,,True
+387,CLN000387,25,Sonographer,Diabetes,Band 6,F,White,0.85,2016-11-03,,True
+388,CLN000388,25,Sonographer,Diabetes,Band 6,F,White,0.94,2020-02-21,2023-04-19,False
+389,CLN000389,25,Radiologist,Radiology,Band 5,M,White,0.67,2012-02-14,,True
+390,CLN000390,25,Radiographer,Primary Care,Band 8a,F,White,0.55,2017-05-12,,True
+391,CLN000391,25,Sonographer,Geriatrics,GP Partner,M,Black,0.92,2015-05-23,,True
+392,CLN000392,25,Radiographer,Geriatrics,Band 7,F,Asian,0.42,2013-02-12,,True
+393,CLN000393,25,Radiologist,Diabetes,Band 5,F,White,0.74,2008-01-26,,True
+394,CLN000394,25,Radiographer,Emergency Medicine,Band 5,F,Black,0.7,2017-12-13,,True
