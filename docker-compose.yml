@@ -1,0 +1,26 @@
+services:
+  ehr_postgres:
+    image: postgres:15
+    container_name: ehr_postgres
+    environment:
+      POSTGRES_USER: ehr_user
+      POSTGRES_PASSWORD: ehr_password
+      POSTGRES_DB: ehr
+    ports:
+      - "5433:5432" # 5433 on host -> 5432 in container to avoid clashing with any local postgres
+    volumes:
+      - ./dynamic_exports/ehr/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  urgent_care_postgres:
+    image: postgres:15
+    container_name: urgent_care_postgres
+    environment:
+      POSTGRES_USER: uc_user
+      POSTGRES_PASSWORD: uc_password
+      POSTGRES_DB: uc
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./dynamic_exports/urgent_care/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped

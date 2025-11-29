@@ -1,37 +1,38 @@
 provider_id,provider_code,provider_name,provider_type,parent_trust_name,ics_region,address_line_1,city,postcode,postcode_sector,lsoa_code,is_active
-1,ACU001,Northshire General Hospital 1,ACUTE_HOSPITAL,South Melissafurt Integrated Care Trust,East Angela ICS,"Flat 00c
-Nixon trail",Morrisonborough,E7 9TT,E7,E01046117,True
-2,ACU002,Northshire General Hospital 2,ACUTE_HOSPITAL,Sylviashire Integrated Care Trust,Hopkinsview ICS,898 Katie canyon,Terenceburgh,NP3N 9NU,NP3N,E01013939,True
-3,GP_003,Northshire GP Practice 1,GP_PRACTICE,Port Davidton Integrated Care Trust,Saunderston ICS,63 Damian run,Richardsonmouth,S8A 8FJ,S8A,E01051803,True
-4,GP_004,Northshire GP Practice 2,GP_PRACTICE,Dominictown Integrated Care Trust,New Louiseview ICS,"Studio 32o
-Chelsea wells",East Jeremybury,LU3M 0PW,LU3M,E01062842,True
-5,GP_005,Northshire GP Practice 3,GP_PRACTICE,Lake Margaret Integrated Care Trust,Deniseburgh ICS,443 Spencer mission,South Clive,N6K 9SU,N6K,E01044198,True
-6,GP_006,Northshire GP Practice 4,GP_PRACTICE,Jamesville Integrated Care Trust,New Daniellefort ICS,388 Liam canyon,East Glen,LL80 2AE,LL80,E01033732,True
-7,GP_007,Northshire GP Practice 5,GP_PRACTICE,Kyleborough Integrated Care Trust,Port Kennethhaven ICS,5 Matthews square,Port Edward,L9 9GX,L9,E01023249,True
-8,GP_008,Northshire GP Practice 6,GP_PRACTICE,New Terence Integrated Care Trust,West Duncan ICS,573 Baker pines,Graemeview,M1 7EN,M1,E01095977,True
-9,GP_009,Northshire GP Practice 7,GP_PRACTICE,Lake Sophie Integrated Care Trust,North Wendybury ICS,"Flat 63
-Lees way",Nashborough,W9 9AB,W9,E01079906,True
-10,GP_010,Northshire GP Practice 8,GP_PRACTICE,South Callumborough Integrated Care Trust,West Jadeview ICS,1 Day wells,Hicksview,YO1H 8RJ,YO1H,E01035067,True
-11,GP_011,Northshire GP Practice 9,GP_PRACTICE,Fostershire Integrated Care Trust,Lake Marianland ICS,6 Miller forks,Port Adrianberg,TR7 8SD,TR7,E01048017,True
-12,GP_012,Northshire GP Practice 10,GP_PRACTICE,Davisfurt Integrated Care Trust,South Rosemary ICS,"Flat 0
-Martin route",New Tonymouth,N89 8ZW,N89,E01037802,False
-13,GP_013,Northshire GP Practice 11,GP_PRACTICE,East Jacobbury Integrated Care Trust,Jonestown ICS,9 Rita mills,East Nigel,S94 2EF,S94,E01045971,True
-14,GP_014,Northshire GP Practice 12,GP_PRACTICE,Port Michelleville Integrated Care Trust,Butlermouth ICS,"Studio 02B
-White locks",Lyndamouth,B1C 3FR,B1C,E01058161,True
-15,GP_015,Northshire GP Practice 13,GP_PRACTICE,West Charlesbury Integrated Care Trust,Tomburgh ICS,"Flat 57
-Alexander island",West Christianbury,L60 2UQ,L60,E01099095,False
-16,GP_016,Northshire GP Practice 14,GP_PRACTICE,Lake Philip Integrated Care Trust,Port Olivia ICS,6 Alice wall,Maryton,HD0E 6UJ,HD0E,E01063385,False
-17,GP_017,Northshire GP Practice 15,GP_PRACTICE,North Hugh Integrated Care Trust,Kington ICS,"Studio 38
-Pearce locks",Brownmouth,GY79 1BA,GY79,E01014199,False
-18,COM018,Northshire Community Clinic 1,COMMUNITY_CLINIC,Douglastown Integrated Care Trust,Port Deanhaven ICS,25 Marsh camp,North Martyn,L0K 5BU,L0K,E01013038,True
-19,COM019,Northshire Community Clinic 2,COMMUNITY_CLINIC,Hallberg Integrated Care Trust,Bethanhaven ICS,"Studio 90
-Reid rapids",New Duncan,B5 1FD,B5,E01021381,True
-20,COM020,Northshire Community Clinic 3,COMMUNITY_CLINIC,Carolynhaven Integrated Care Trust,Saraland ICS,"Flat 18Y
-Yates track",Bryantbury,B1G 7EP,B1G,E01021352,True
-21,COM021,Northshire Community Clinic 4,COMMUNITY_CLINIC,Port Nigelside Integrated Care Trust,East Iainhaven ICS,107 Butler estates,Jonesfurt,E5C 9YW,E5C,E01073378,True
-22,URG022,Northshire Urgent Care Centre 1,URGENT_CARE,Rhyschester Integrated Care Trust,East Sophie ICS,"Studio 39V
-Thompson unions",North Dianamouth,W6U 4SP,W6U,E01059593,True
-23,URG023,Northshire Urgent Care Centre 2,URGENT_CARE,Kathleenland Integrated Care Trust,Jacquelineport ICS,"Studio 93
-Ahmed loop",South Denis,W7C 1NA,W7C,E01022566,True
-24,DIA024,Northshire Diagnostics Hub 1,DIAGNOSTIC_CENTRE,Jonesmouth Integrated Care Trust,Leanneland ICS,8 King ridges,Atkinsonville,B1 0JL,B1,E01059986,True
-25,DIA025,Northshire Diagnostics Hub 2,DIAGNOSTIC_CENTRE,Port Jemma Integrated Care Trust,Rowleyville ICS,5 Nathan mission,Lake Graemestad,NR55 4SZ,NR55,E01077712,True
+1,ACU001,Northshire General Hospital 1,ACUTE_HOSPITAL,Hughesfort Integrated Care Trust,East Sandrafurt ICS,373 Frances way,New Dale,ST3 5WJ,ST3,E01046117,True
+2,ACU002,Northshire General Hospital 2,ACUTE_HOSPITAL,Reevesville Integrated Care Trust,Lewisberg ICS,"Studio 65
+Claire meadows",Mitchellberg,M8 7QG,M8,E01013939,True
+3,GP_003,Northshire GP Practice 1,GP_PRACTICE,Benjaminstad Integrated Care Trust,Angelatown ICS,316 Jordan lake,Laurenberg,W5 3BD,W5,E01051803,True
+4,GP_004,Northshire GP Practice 2,GP_PRACTICE,Jamesville Integrated Care Trust,Shortville ICS,961 Michael run,Ruthshire,LE0W 2HX,LE0W,E01062842,True
+5,GP_005,Northshire GP Practice 3,GP_PRACTICE,Tonybury Integrated Care Trust,New Declan ICS,"Studio 63J
+Paula falls",Collinshaven,L8C 9SB,L8C,E01044198,True
+6,GP_006,Northshire GP Practice 4,GP_PRACTICE,Woodstown Integrated Care Trust,Smithburgh ICS,871 Tony fords,Lake Heatherstad,G0 9QS,G0,E01033732,True
+7,GP_007,Northshire GP Practice 5,GP_PRACTICE,Clementston Integrated Care Trust,Collinsberg ICS,55 Amy station,Port Cameronfort,M5 9HB,M5,E01023249,True
+8,GP_008,Northshire GP Practice 6,GP_PRACTICE,Garethfurt Integrated Care Trust,Cookbury ICS,"Flat 3
+Clarke square",New Reeceport,GL59 2ET,GL59,E01095977,True
+9,GP_009,Northshire GP Practice 7,GP_PRACTICE,East Ricky Integrated Care Trust,Jordanbury ICS,"Studio 09l
+Barbara burgs",Rogerland,B8 3NY,B8,E01079906,True
+10,GP_010,Northshire GP Practice 8,GP_PRACTICE,Lake Elizabethport Integrated Care Trust,Abbiestad ICS,718 Kerry pike,Hughesfort,N63 1HW,N63,E01035067,True
+11,GP_011,Northshire GP Practice 9,GP_PRACTICE,Lake Naomibury Integrated Care Trust,New Beth ICS,031 Neil trace,Stevenville,PO40 7JH,PO40,E01048017,True
+12,GP_012,Northshire GP Practice 10,GP_PRACTICE,Jemmahaven Integrated Care Trust,Lake Alexander ICS,"Flat 83
+Adam ridge",Lake Barbara,G72 8AL,G72,E01037802,False
+13,GP_013,Northshire GP Practice 11,GP_PRACTICE,Albertbury Integrated Care Trust,North Heatherfort ICS,550 Gray via,Lake Terenceshire,EC6 0HJ,EC6,E01045971,True
+14,GP_014,Northshire GP Practice 12,GP_PRACTICE,Atkinsonfort Integrated Care Trust,New Rita ICS,680 Harrison estate,East Rosie,IV49 7LS,IV49,E01058161,True
+15,GP_015,Northshire GP Practice 13,GP_PRACTICE,New Mariefort Integrated Care Trust,Lake Leighhaven ICS,"Studio 76
+Toby tunnel",Port Bradleyborough,BR81 5TQ,BR81,E01099095,False
+16,GP_016,Northshire GP Practice 14,GP_PRACTICE,South Janetborough Integrated Care Trust,Stevenfort ICS,52 White mountains,Harryland,M5 4UP,M5,E01063385,False
+17,GP_017,Northshire GP Practice 15,GP_PRACTICE,Morrisfurt Integrated Care Trust,Lake Martyn ICS,6 Max mission,Port Kathrynmouth,M60 8YJ,M60,E01014199,False
+18,COM018,Northshire Community Clinic 1,COMMUNITY_CLINIC,West Gregorychester Integrated Care Trust,South Philipfurt ICS,"Flat 8
+Eleanor circles",Burkefort,B6 2BG,B6,E01013038,True
+19,COM019,Northshire Community Clinic 2,COMMUNITY_CLINIC,Cunninghammouth Integrated Care Trust,Aliton ICS,"Studio 33
+Mandy wells",Collierland,OX28 8TT,OX28,E01021381,True
+20,COM020,Northshire Community Clinic 3,COMMUNITY_CLINIC,North Claireton Integrated Care Trust,Woodchester ICS,"Studio 2
+Matthews green",North Francesca,CW0 1TR,CW0,E01021352,True
+21,COM021,Northshire Community Clinic 4,COMMUNITY_CLINIC,Annamouth Integrated Care Trust,South Hilarystad ICS,"Studio 05I
+Joyce knoll",New Georgebury,E0 8BU,E0,E01073378,True
+22,URG022,Northshire Urgent Care Centre 1,URGENT_CARE,Rogersbury Integrated Care Trust,Ballchester ICS,554 Duncan fort,South Malcolm,L7 9FW,L7,E01059593,True
+23,URG023,Northshire Urgent Care Centre 2,URGENT_CARE,Lynnville Integrated Care Trust,Cookton ICS,6 Bailey ridges,Anneville,IM4 0HP,IM4,E01022566,True
+24,DIA024,Northshire Diagnostics Hub 1,DIAGNOSTIC_CENTRE,Port Philliptown Integrated Care Trust,Lake Susanburgh ICS,"Flat 23S
+Davies lake",New Jadeside,HP2 9QF,HP2,E01059986,True
+25,DIA025,Northshire Diagnostics Hub 2,DIAGNOSTIC_CENTRE,South Susan Integrated Care Trust,Lake Raymond ICS,"Flat 37e
+West harbors",South Arthurburgh,SS50 1UN,SS50,E01077712,True

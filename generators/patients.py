@@ -32,8 +32,8 @@ def generate_patients(n_patients, seed):
     sex = np.random.choice(sex_choices, size=n_patients, p=sex_probs)
 
     # 3. Ethnicity
-    eth_choices = ["White", "Asian", "Black", "Mixed", "Other"]
-    eth_probs = [0.82, 0.09, 0.04, 0.03, 0.02]
+    eth_choices = ["White", "Asian", "Black", "Mixed", "Other", None]
+    eth_probs = [0.8, 0.065, 0.02, 0.01, 0.005, 0.1]
     ethnicity = np.random.choice(eth_choices, size=n_patients, p=eth_probs)
 
     # 4. IMD decile (1 = most deprived)
@@ -122,5 +122,11 @@ def generate_patients(n_patients, seed):
         "registration_end_date": registration_end_date,
         "is_active": is_active,
     })
+
+    # introduce noise
+    mask_dummy_pc = np.random.rand(len(df_patients)) < 0.02
+    df_patients.loc[mask_dummy_pc, "postcode_sector"] = "UNKNOWN"
+    mask_messy_pc = np.random.rand(len(df_patients)) < 0.05
+    df_patients.loc[mask_messy_pc, "postcode_sector"] = df_patients.loc[mask_messy_pc, "postcode_sector"].str.replace(" ", "", regex=False)
 
     return df_patients

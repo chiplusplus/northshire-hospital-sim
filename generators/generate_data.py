@@ -11,7 +11,7 @@ This script wires everything together and ensures IDs / FKs are consistent.
 """
 
 from pathlib import Path
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
 
@@ -21,7 +21,13 @@ from generators.providers import generate_providers
 from generators.clinicians import generate_clinicians
 from generators.encounters import generate_encounters
 from generators.referrals import generate_referrals
-from generators.diagnostics import generate_diagnostics
+from generators.diagnostics import generate_diagnostics, apply_diagnostics_quality_issues
+from generators.exports import build_appointment_export, build_diagnoses_export, build_site_info_export
+from generators.urgent_care import (
+    generate_urgent_care_logs,
+    degrade_urgent_care_quality,
+)
+from static_exports.scripts.write_files_to_s3 import upload_exports_to_s3
 
 
 # -------------------
@@ -76,7 +82,7 @@ def main():
     print("=== Synthetic NHS inequality dataset generation ===")
 
     # 1) Patients
-    print("\n[1/6] Generating patients...")
+    print("\n[1/7] Generating patients...")
     patients_df = generate_patients(
         n_patients=N_PATIENTS,
         seed=GLOBAL_SEED,
@@ -86,7 +92,7 @@ def main():
     save_df(patients_df, "patients")
 
     # 2) Providers / Sites
-    print("\n[2/6] Generating providers / sites...")
+    print("\n[2/7] Generating providers / sites...")
     providers_df = generate_providers(
         n_providers=N_PROVIDERS,
         seed=GLOBAL_SEED + 1,
@@ -96,7 +102,7 @@ def main():
     save_df(providers_df, "providers")
 
     # 3) Clinicians
-    print("\n[3/6] Generating clinicians...")
+    print("\n[3/7] Generating clinicians...")
     clinicians_df = generate_clinicians(
         n_clinicians=N_CLINICIANS,
         providers_df=providers_df,
@@ -106,7 +112,7 @@ def main():
     save_df(clinicians_df, "clinicians")
 
     # 4) Encounters
-    print("\n[4/6] Generating encounters...")
+    print("\n[4/7] Generating encounters...")
     encounters_df = generate_encounters(
         patients_df=patients_df,
         providers_df=providers_df,
@@ -126,7 +132,7 @@ def main():
     save_df(encounters_df, "encounters")
 
     # 5) Referrals
-    print("\n[5/6] Generating referrals...")
+    print("\n[5/7] Generating referrals...")
     referrals_df = generate_referrals(
         patients_df=patients_df,
         providers_df=providers_df,
@@ -145,7 +151,7 @@ def main():
     save_df(referrals_df, "referrals")
 
     # 6) Diagnostics
-    print("\n[6/6] Generating diagnostics...")
+    print("\n[6/7] Generating diagnostics...")
     diagnostics_df = generate_diagnostics(
         referrals_df=referrals_df,
         patients_df=patients_df,
@@ -163,10 +169,73 @@ def main():
                 encounters_df["encounter_id"]
             ).all(), \
                 "Some diagnostics.encounter_id not found in encounters"
+    diagnostics_df = apply_diagnostics_quality_issues(diagnostics_df, seed=GLOBAL_SEED + 5)
 
     save_df(diagnostics_df, "diagnostics")
 
+    # 7) Urgent Care Logs
+    print("\n[7/7] Generating urgent care logs...")
+    urgent_logs_df = generate_urgent_care_logs(encounters_df, patients_df, providers_df, seed=99)
+    urgent_logs_df = degrade_urgent_care_quality(urgent_logs_df, seed=GLOBAL_SEED + 6)
+    
+    if "patient_id" in urgent_logs_df.columns:
+        assert urgent_logs_df["patient_id"].isin(patients_df["patient_id"]).all(), \
+            "Some urgent_care.patient_id not found in patients"
+    if "provider_id" in urgent_logs_df.columns:
+        assert urgent_logs_df["provider_id"].isin(providers_df["provider_id"]).all(), \
+            "Some urgent_care.provider_id not found in patients"
+    
+    save_df(urgent_logs_df, "urgent_care_logs")
+
     print("\n🎉 Done. All synthetic datasets generated in:", OUTPUT_DIR)
+
+    # 7) Static Exports
+
+    print("=== Export files generation ===")
+    
+    print("\n[1/3] Generating appointments csv...")
+    start = date(2024, 12, 1)
+    end = date(2024, 12, 31)
+
+    current = start
+    while current <= end:
+        build_appointment_export(
+            encounters_df=encounters_df,
+            patients_df=patients_df,
+            export_date=current,
+            seed=GLOBAL_SEED + 7,
+        )
+        current += timedelta(days=1)
+
+    print(f"✅ Generated urgent care logs exports for {start} to {end}")
+
+    print("\n[2/3] Generating diagnostic orders csv...")
+    build_diagnoses_export(
+        diagnostics_df=diagnostics_df,
+    )
+
+    print("✅ Generated diagnostic orders exports")
+
+    print("\n[3/3] Generating site information excel sheet...")
+    build_site_info_export(
+        providers_df=providers_df,
+        seed=GLOBAL_SEED + 8,
+    )
+
+    print("✅ Generated site information excel sheet")
+    
+    print("=== Exporting files to required destination ===")
+
+    print("\n[1/1] Uploading diagnostic orders to s3...")
+    upload_exports_to_s3(
+        local_dir= Path("static_exports") / "s3_trust" / "diagnostics_orders",
+        bucket="northshire-trust-diagnostics-exports",
+        prefix="diagnostics_orders/",
+    )
+
+    print("✅ Uploaded diagnostic orders to s3.")
+    
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,16 @@
+diagnostic_id,patient_id,referral_id,encounter_id,provider_id,test_type,test_panel,request_date,performed_date,result_date,result_flag
+4935,5294,3206.0,,20,mri,mri_brain,2025-01-26,2025-02-11,2025-02-16,normal
+6143,6559,4001.0,,18,ecg,stress_ecg,2025-01-26,2025-02-15,2025-02-18,normal
+10612,11466,6868.0,,18,bloods,generic_bloods_panel,2025-01-26,2025-01-29,2025-01-29,normal
+10777,11662,6982.0,,18,xray,limb_xray,2025-01-26,2025-01-28,2025-02-02,inconclusive
+15812,16993,10223.0,,18,ultrasound,abdominal_ultrasound,2025-01-26,2025-02-05,2025-02-07,normal
+19589,20975,12637.0,,1,mri,mri_knee,2025-01-26,2025-02-10,2025-02-14,normal
+24340,26060,15680.0,,22,ct,ct_abdomen,2025-01-26,2025-02-10,2025-02-13,normal
+24665,26417,15893.0,,18,bloods,generic_bloods_panel,2025-01-26,2025-02-10,2025-02-16,normal
+30018,32176,19350.0,,18,ct,ct_abdomen,2025-01-26,2025-02-14,2025-02-14,abnormal
+34743,37274,22440.0,,20,ct,ct_head,2025-01-26,2025-02-06,2025-02-06,normal
+57401,61921,37017.0,,1,ct,ct_chest,2025-01-26,2025-02-14,2025-02-15,abnormal
+85441,91365,55120.0,,23,ecg,resting_ecg,2025-01-26,2025-02-15,2025-02-17,normal
+87813,93880,56652.0,,21,bloods,lipids,2025-01-26,2025-01-27,2025-01-30,inconclusive
+92462,98713,59676.0,,20,bloods,generic_bloods_panel,2025-01-26,2025-02-07,2025-02-13,normal
+93133,99343,60105.0,,18,mri,mri_spine,2025-01-26,2025-02-05,2025-02-05,normal

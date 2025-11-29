@@ -147,6 +147,36 @@ def generate_diagnostics(referrals_df, patients_df,encounters_df, seed):
     diagnostics_df.insert(0, "diagnostic_id", range(1, len(diagnostics_df) + 1))
     return diagnostics_df
 
-# Example usage:
-# diagnostics_df = generate_diagnostics(referrals_df, patients_df, providers_df, encounters_df)
-# diagnostics_df.head()
+def apply_diagnostics_quality_issues(diagnostics_df, seed):
+    rng = np.random.default_rng(seed)
+    df = diagnostics_df.copy()
+
+    # 1) Break some links to encounters (simulate missing encounter mapping)
+    mask_break_link = rng.random(len(df)) < 0.18  # ~18% of rows lose encounter linkage
+    df.loc[mask_break_link, "encounter_id"] = None
+
+    # 2) Site-specific grouping differences:
+    #    - e.g. some providers group 'bloods' panels differently
+    #    - or reuse slightly different panel labels.
+    # Keep it simple but plausible.
+
+    # Example: for a subset of providers, collapse detailed blood panels into a generic label
+    blood_mask = (df["test_type"] == "bloods")
+    special_provider_mask = df["provider_id"].isin(
+        df["provider_id"].drop_duplicates().sample(frac=0.2, random_state=seed)
+    )
+    mask_collapse = blood_mask & special_provider_mask
+    df.loc[mask_collapse, "test_panel"] = "generic_bloods_panel"
+
+    # Another: randomly flip some panels into local naming conventions
+    local_panel_map = {
+        "lipids": "lipid_profile",
+        "u_and_e": "U+E",
+        "lfts": "LFT_profile",
+    }
+
+    for src, dst in local_panel_map.items():
+        flip_mask = (df["test_panel"] == src) & (rng.random(len(df)) < 0.3)
+        df.loc[flip_mask, "test_panel"] = dst
+
+    return df
