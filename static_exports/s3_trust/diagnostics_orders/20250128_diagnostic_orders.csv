@@ -1,6 +1,0 @@
-diagnostic_id,patient_id,referral_id,encounter_id,provider_id,test_type,test_panel,request_date,performed_date,result_date,result_flag
-15965,17167,10328.0,,19,bloods,u_and_e,2025-01-28,2025-02-17,2025-02-17,abnormal
-23263,24840,14976.0,,23,ct,ct_chest,2025-01-28,2025-02-14,2025-02-20,abnormal
-31311,33580,20198.0,,2,bloods,lipids,2025-01-28,2025-02-08,2025-02-13,normal
-49527,53196,31950.0,,23,ct,ct_chest,2025-01-28,2025-02-15,2025-02-19,normal
-64969,69797,41895.0,,24,ecg,resting_ecg,2025-01-28,2025-02-04,2025-02-04,normal
