@@ -1,17 +1,28 @@
 services:
-  ehr_postgres:
-    image: postgres:15
-    container_name: ehr_postgres
+  ehr_internal_postgres:
+    image: postgres:18.1
+    container_name: ehr_internal_postgres
     environment:
-      POSTGRES_USER: ehr_user
-      POSTGRES_PASSWORD: ehr_password
-      POSTGRES_DB: ehr
+      POSTGRES_USER: ehr_admin
+      POSTGRES_PASSWORD: ehr_admin_pw
+      POSTGRES_DB: ehr_internal
     ports:
-      - "5433:5432" # 5433 on host -> 5432 in container to avoid clashing with any local postgres
+      - "5433:5432"
     volumes:
+      - ehr_internal_data:/var/lib/postgresql/data
       - ./dynamic_exports/ehr/init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
 
+  ehr_mirror_postgres:
+    image: postgres:18.1
+    container_name: ehr_mirror_postgres
+    environment:
+      POSTGRES_USER: mirror_admin
+      POSTGRES_PASSWORD: mirror_admin_pw
+      POSTGRES_DB: ehr_mirror
+    ports:
+      - "5434:5432"
+    volumes:
+      - ehr_mirror_data:/var/lib/postgresql/data
   urgent_care_postgres:
     image: postgres:15
     container_name: urgent_care_postgres

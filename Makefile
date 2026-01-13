@@ -10,7 +10,7 @@ load-data:
 	$(PY) -m dynamic_exports.urgent_care.load_logs
 
 container-up:
-	docker compose up -d ehr_postgres
+	docker compose up -d ehr_internal_postgres
 	docker compose up -d urgent_care_postgres
 
 container-down:
