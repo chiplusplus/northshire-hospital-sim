@@ -1,32 +1,33 @@
+"""
+Provider/site generator.
+
+Creates a synthetic provider dimension dataset (sites and services).
+Returns a pandas DataFrame.
+"""
+
 import numpy as np
 import pandas as pd
 from faker import Faker
-from datetime import date
 
 fake = Faker("en_GB")
 
-def generate_providers(
-    n_providers,
-    seed
-):
+def generate_providers(n_providers: int, seed: int) -> pd.DataFrame:
+    rng = np.random.default_rng(seed)
+
     n_gp = int(n_providers * 0.6)
     n_hospitals = int(n_providers * 0.08)
     n_community = int(n_providers * 0.16)
     n_urgent_care = int(n_providers * 0.08)
     n_diagnostic = int(n_providers * 0.08)
 
-    rng = np.random.default_rng(seed)
-
     records = []
     provider_id = 1
 
-
-    # helper to derive sector from full postcode
     def get_postcode_sector(full_postcode: str) -> str:
         parts = full_postcode.split()
         return parts[0] if len(parts) >= 1 else full_postcode
 
-    def add_provider_batch(count, ptype, name_template):
+    def add_provider_batch(count: int, ptype: str, name_template: str):
         nonlocal provider_id
         for i in range(count):
             is_active = bool(rng.choice([True, False], p=[0.9, 0.1]))
@@ -57,5 +58,4 @@ def generate_providers(
     add_provider_batch(n_urgent_care, "URGENT_CARE", "Northshire Urgent Care Centre {}")
     add_provider_batch(n_diagnostic, "DIAGNOSTIC_CENTRE", "Northshire Diagnostics Hub {}")
 
-    providers_df = pd.DataFrame(records)
-    return providers_df
+    return pd.DataFrame(records)

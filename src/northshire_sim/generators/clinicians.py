@@ -1,9 +1,15 @@
+"""
+Clinician/workforce generator.
+
+Creates a synthetic clinician dimension dataset, allocated to providers.
+"""
+
 import numpy as np
 import pandas as pd
 from datetime import date
 
 
-def generate_clinicians(n_clinicians, providers_df, seed):
+def generate_clinicians(providers_df: pd.DataFrame, seed: int) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     records = []
 
@@ -23,43 +29,31 @@ def generate_clinicians(n_clinicians, providers_df, seed):
 
     bands = ["Band 5", "Band 6", "Band 7", "Band 8a", "Consultant", "GP Partner", "ST3"]
 
-    ethnicity_categories = [
-        "White",
-        "Black",
-        "Asian",
-        "Mixed",
-        "Other",
-    ]
+    ethnicity_categories = ["White", "Black", "Asian", "Mixed", "Other"]
     ethnicity_probs = [0.75, 0.07, 0.10, 0.04, 0.04]
-
-    # ------------------------------
-    # 1. Staffing weights per type
-    # ------------------------------
-    staffing_weights = {
-        "ACUTE_HOSPITAL": 1.0,
-        "URGENT_CARE": 0.6,
-        "DIAGNOSTIC_CENTRE": 0.5,
-        "COMMUNITY_CLINIC": 0.4,
-        "GP_PRACTICE": 0.25,
-    }
-    # calculate total weight of the provider population
-    provider_weights = providers_df["provider_type"].map(staffing_weights).fillna(0.3)
-    total_weight = provider_weights.sum()
-
-    # calculate clinicians per provider (proportional)
-    providers_df["clinicians_allocated"] = (
-        (provider_weights / total_weight) * n_clinicians
-    ).round().astype(int)
 
     clinician_id = 1
 
     for _, row in providers_df.iterrows():
         ptype = row["provider_type"]
-        n_for_provider = int(row["clinicians_allocated"])
-       
+
+        # Rough staffing levels: more clinicians at hospitals
+        if ptype == "ACUTE_HOSPITAL":
+            n_site_clinicians = rng.integers(80, 150)
+        elif ptype == "GP_PRACTICE":
+            n_site_clinicians = rng.integers(8, 20)
+        elif ptype == "COMMUNITY_CLINIC":
+            n_site_clinicians = rng.integers(15, 40)
+        elif ptype == "URGENT_CARE":
+            n_site_clinicians = rng.integers(20, 50)
+        elif ptype == "DIAGNOSTIC_CENTRE":
+            n_site_clinicians = rng.integers(10, 25)
+        else:
+            n_site_clinicians = rng.integers(5, 15)
+
         roles = roles_by_type.get(ptype, ["Clinician"])
 
-        for _ in range(n_for_provider):
+        for _ in range(n_site_clinicians):
             role = rng.choice(roles)
             specialty = rng.choice(specialties)
             band = rng.choice(bands)
@@ -67,7 +61,6 @@ def generate_clinicians(n_clinicians, providers_df, seed):
             ethnicity = rng.choice(ethnicity_categories, p=ethnicity_probs)
             fte = np.round(rng.uniform(0.4, 1.0), 2)
 
-            # employment dates
             start_year = int(rng.integers(2008, 2023))
             start_month = int(rng.integers(1, 13))
             start_day = int(rng.integers(1, 28))
@@ -81,23 +74,22 @@ def generate_clinicians(n_clinicians, providers_df, seed):
                 end_day = int(rng.integers(1, 28))
                 end_date = date(end_year, end_month, end_day)
 
-            record = {
-                "clinician_id": clinician_id,
-                "clinician_code": f"CLN{clinician_id:06d}",
-                "provider_id": row["provider_id"],
-                "role": role,
-                "specialty": specialty,
-                "grade_band": band,
-                "sex": sex,
-                "ethnicity_ons": ethnicity,
-                "fte": fte,
-                "start_date": start_date,
-                "end_date": end_date,
-                "is_active": is_active,
-            }
-            records.append(record)
+            records.append(
+                {
+                    "clinician_id": clinician_id,
+                    "clinician_code": f"CLN{clinician_id:06d}",
+                    "provider_id": row["provider_id"],
+                    "role": role,
+                    "specialty": specialty,
+                    "grade_band": band,
+                    "sex": sex,
+                    "ethnicity_ons": ethnicity,
+                    "fte": fte,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "is_active": is_active,
+                }
+            )
             clinician_id += 1
 
-    clinicians_df = pd.DataFrame(records)
-    return clinicians_df
-
+    return pd.DataFrame(records)

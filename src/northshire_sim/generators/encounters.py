@@ -1,8 +1,17 @@
+"""
+Encounter generator.
+
+Generates encounter events for patients across a time range
+"""
+
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-def expected_annual_rate(row):
+CONDITION_CODES = ["HTN", "DM2", "ASTHMA", "COPD", "ANXIETY", "DEPRESSION", "SCREENING"]
+
+
+def expected_annual_rate(row) -> float:
     base_rate_by_age = {
         "0-17": 1.2,
         "18-39": 1.5,
@@ -18,7 +27,8 @@ def expected_annual_rate(row):
         rate *= 0.9
     return max(rate, 0.5)
 
-def encounter_type_probs(row):
+
+def encounter_type_probs(row) -> dict:
     base = {
         "GP": 0.45,
         "OP": 0.20,
@@ -40,9 +50,8 @@ def encounter_type_probs(row):
         base[k] /= total
     return base
 
-condition_codes = ["HTN", "DM2", "ASTHMA", "COPD", "ANXIETY", "DEPRESSION", "SCREENING"]
 
-def sample_wait_time_days(enc_type, imd_decile, ethnicity_ons, rng: np.random.Generator):
+def sample_wait_time_days(enc_type: str, imd_decile: int, ethnicity_ons, rng: np.random.Generator) -> int:
     if enc_type in ["ED", "IP"]:
         base = int(rng.integers(0, 2))  # 0–1 days
     else:
@@ -53,12 +62,22 @@ def sample_wait_time_days(enc_type, imd_decile, ethnicity_ons, rng: np.random.Ge
             base += int(rng.integers(0, 11))
     return max(base, 0)
 
-def generate_encounters(patients_df, providers_df, clinicians_df, start_date, end_date, seed):
+
+def generate_encounters(
+    patients_df: pd.DataFrame,
+    providers_df: pd.DataFrame,
+    clinicians_df: pd.DataFrame,
+    start_date,
+    end_date,
+    seed: int,
+) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     encounters = []
 
+    provider_ids = providers_df["provider_id"].tolist()
+    clinician_ids = clinicians_df["clinician_id"].tolist()
+
     for _, p in patients_df.iterrows():
-        # work out observation window for this patient
         start = max(pd.to_datetime(p["registration_start_date"]).date(), start_date)
         end_reg = p["registration_end_date"]
         if pd.isna(end_reg):
@@ -76,33 +95,25 @@ def generate_encounters(patients_df, providers_df, clinicians_df, start_date, en
         years_observed = days_range / 365.0
         lam = expected_annual_rate(p) * years_observed
         n_enc = rng.poisson(lam)
-        n_enc = min(n_enc, 40)  # clamp extreme frequent flyers
+        n_enc = min(n_enc, 40)
 
         if n_enc == 0:
             continue
 
         probs = encounter_type_probs(p)
-        enc_types = rng.choice(
-            list(probs.keys()),
-            size=n_enc,
-            p=list(probs.values())
-        )
+        enc_types = rng.choice(list(probs.keys()), size=n_enc, p=list(probs.values()))
 
         for i in range(n_enc):
-            # random offset within registration window
             days_offset = int(rng.integers(0, days_range))
             enc_start = start + timedelta(days=days_offset)
 
-            # random duration: hours
             duration_hours = int(rng.integers(1, 8))
             enc_end = enc_start + timedelta(hours=duration_hours)
 
             enc_type = enc_types[i]
             wait_days = sample_wait_time_days(enc_type, p["imd_decile"], p["ethnicity_ons"], rng)
 
-            provider_ids = providers_df["provider_id"].tolist()
             site_id = rng.choice(provider_ids)
-            clinician_ids = clinicians_df["clinician_id"].tolist()
             clinician_id = rng.choice(clinician_ids) if len(clinician_ids) > 0 else None
 
             if enc_type in ["ED", "IP"]:
@@ -114,7 +125,7 @@ def generate_encounters(patients_df, providers_df, clinicians_df, start_date, en
 
             was_attended = bool(rng.choice([1, 0], p=[0.9, 0.1]))
             first_flag = bool(rng.choice([1, 0], p=[0.3, 0.7]))
-            condition = rng.choice(condition_codes)
+            condition = rng.choice(CONDITION_CODES)
 
             source_system_map = {
                 "GP": "APPOINTMENT",
@@ -125,22 +136,24 @@ def generate_encounters(patients_df, providers_df, clinicians_df, start_date, en
                 "DIAGNOSTIC": "DIAGNOSTIC",
             }
 
-            encounters.append({
-                "patient_id": p["patient_id"],
-                "encounter_id": None,  # will fill after DataFrame
-                "encounter_datetime_start": enc_start,
-                "encounter_datetime_end": enc_end,
-                "encounter_type": enc_type,
-                "source_system": source_system_map[enc_type],
-                "provider_id": site_id,
-                "clinician_id": clinician_id,
-                "priority": priority,
-                "was_attended": was_attended,
-                "first_attendance_flag": first_flag,
-                "primary_condition_code": condition,
-                "wait_time_days": wait_days,
-                "created_at": datetime.utcnow(),
-            })
+            encounters.append(
+                {
+                    "patient_id": p["patient_id"],
+                    "encounter_id": None,
+                    "encounter_datetime_start": enc_start,
+                    "encounter_datetime_end": enc_end,
+                    "encounter_type": enc_type,
+                    "source_system": source_system_map[enc_type],
+                    "provider_id": site_id,
+                    "clinician_id": clinician_id,
+                    "priority": priority,
+                    "was_attended": was_attended,
+                    "first_attendance_flag": first_flag,
+                    "primary_condition_code": condition,
+                    "wait_time_days": wait_days,
+                    "created_at": datetime.utcnow(),
+                }
+            )
 
     enc_df = pd.DataFrame(encounters)
     if not enc_df.empty:
@@ -163,5 +176,5 @@ def generate_encounters(patients_df, providers_df, clinicians_df, start_date, en
                 "created_at",
             ]
         ]
-    return enc_df
 
+    return enc_df
