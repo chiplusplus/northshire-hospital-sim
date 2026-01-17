@@ -1,250 +1,258 @@
+#!/usr/bin/env python3
 """
-Master synthetic data generator for:
-- Patients
-- Providers / Sites
-- Clinicians
-- Encounters
-- Referrals
-- Diagnostics
+Generate synthetic Northshire Trust datasets into local staging.
 
-This script wires everything together and ensures IDs / FKs are consistent.
+Pipeline:
+1) Generate core DataFrames via src/northshire_sim/generators/*
+2) Validate dataset integrity via src/northshire_sim/checks/validate.py
+3) Write core staging CSVs to data/staging/core/
+4) Build export artifacts via src/northshire_sim/exports/exports.py
+5) Write export artifacts to data/staging/exports/
+
+Publishing (DB/S3/SFTP) is handled by scripts/publish_*.py.
 """
 
-from pathlib import Path
+from __future__ import annotations
+
+import argparse
+from dataclasses import dataclass
 from datetime import date, timedelta
+from pathlib import Path
+from typing import Dict, List
 
 import pandas as pd
 
-# --- import your existing generators here ---
-from generators.helpers.patients import generate_patients
-from generators.helpers.providers import generate_providers
-from generators.helpers.clinicians import generate_clinicians
-from generators.helpers.encounters import generate_encounters
-from generators.helpers.referrals import generate_referrals
-from generators.helpers.diagnostics import generate_diagnostics, apply_diagnostics_quality_issues
-from src.northshire_sim.exports.exports import build_appointment_export, build_diagnoses_export, build_site_info_export
-from generators.helpers.urgent_care import (
-    generate_urgent_care_logs,
-    degrade_urgent_care_quality,
+# ---- generators (pure) ----
+from src.northshire_sim.generators.patients import generate_patients
+from src.northshire_sim.generators.providers import generate_providers
+from src.northshire_sim.generators.clinicians import generate_clinicians
+from src.northshire_sim.generators.encounters import generate_encounters
+from src.northshire_sim.generators.referrals import generate_referrals
+from src.northshire_sim.generators.diagnostics import generate_diagnostics
+from src.northshire_sim.generators.urgent_care import generate_urgent_care_logs
+
+# ---- validation (centralised) ----
+from src.northshire_sim.checks.validate import validate_dataset
+
+# ---- exports (pure transforms) ----
+from src.northshire_sim.exports.exports import (
+    ExportArtifact,
+    build_appointment_exports,
+    build_diagnostic_orders_exports,
+    build_provider_reference_excel_artifact,
 )
-from static_exports.scripts.write_files_to_s3 import upload_exports_to_s3
 
 
-# -------------------
-# CONFIG
-# -------------------
+# -------------------------
+# Config
+# -------------------------
 
-OUTPUT_DIR = Path("data/generated")  # e.g. data/raw/dev
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-N_PATIENTS = 100_000
-N_PROVIDERS = 25          # tweak as you like
-N_CLINICIANS = 400        # tweak as you like
-
-ANALYSIS_START = date(2022, 1, 1)
-ANALYSIS_END = date(2024, 12, 31)
-
-GLOBAL_SEED = 42  # use for reproducibility
+@dataclass(frozen=True)
+class GenerationConfig:
+    seed: int
+    n_patients: int
+    n_providers: int
+    start_date: date
+    end_date: date
+    appointment_export_days: int
+    diagnostics_export_days: int
 
 
-# -------------------
-# UTILS
-# -------------------
+DEFAULTS = GenerationConfig(
+    seed=42,
+    n_patients=100_000,
+    n_providers=125,
+    start_date=date(2023, 1, 1),
+    end_date=date(2024, 12, 31),
+    appointment_export_days=14,
+    diagnostics_export_days=14,
+)
 
-def set_pandas_options():
-    pd.set_option("display.width", 200)
-    pd.set_option("display.max_columns", 50)
+
+# -------------------------
+# Writers (staging IO only)
+# -------------------------
+
+def write_csv(df: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
 
 
-def save_df(df: pd.DataFrame, name: str, format: str = "csv") -> None:
-    """
-    Save a dataframe to OUTPUT_DIR with a consistent naming pattern.
-    """
-    path = OUTPUT_DIR / f"{name}.{format}"
+def write_excel(sheets: Dict[str, pd.DataFrame], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        for sheet_name, df in sheets.items():
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-    if format == "parquet":
-        df.to_parquet(path, index=False)
-    elif format == "csv":
-        df.to_csv(path, index=False)
+
+def write_artifact(artifact: ExportArtifact, base_dir: Path) -> Path:
+    out_path = base_dir / artifact.relative_path
+
+    if artifact.format == "csv":
+        assert isinstance(artifact.payload, pd.DataFrame)
+        write_csv(artifact.payload, out_path)
+    elif artifact.format == "xlsx":
+        assert isinstance(artifact.payload, dict)
+        write_excel(artifact.payload, out_path)
     else:
-        raise ValueError(f"Unsupported format: {format}")
+        raise ValueError(f"Unsupported export format: {artifact.format}")
 
-    print(f"✅ Saved {name} -> {path} (rows={len(df)})")
+    return out_path
 
 
-# -------------------
-# MAIN ORCHESTRATION
-# -------------------
+def summarise(name: str, df: pd.DataFrame) -> None:
+    print(f"{name:>12}: rows={len(df):>8,} cols={df.shape[1]:>3}")
 
-def main():
-    set_pandas_options()
 
-    print("=== Synthetic NHS inequality dataset generation ===")
+# -------------------------
+# Pipeline steps
+# -------------------------
 
-    # 1) Patients
-    print("\n[1/7] Generating patients...")
-    patients_df = generate_patients(
-        n_patients=N_PATIENTS,
-        seed=GLOBAL_SEED,
-    )
-    # Ensure patient_id is unique and sorted
-    patients_df = patients_df.sort_values("patient_id").reset_index(drop=True)
-    save_df(patients_df, "patients")
+def generate_core(cfg: GenerationConfig) -> Dict[str, pd.DataFrame]:
+    patients = generate_patients(cfg.n_patients, seed=cfg.seed)
+    providers = generate_providers(cfg.n_providers, seed=cfg.seed)
+    clinicians = generate_clinicians(providers_df=providers, seed=cfg.seed)
 
-    # 2) Providers / Sites
-    print("\n[2/7] Generating providers / sites...")
-    providers_df = generate_providers(
-        n_providers=N_PROVIDERS,
-        seed=GLOBAL_SEED + 1,
-    )
-    # Expect provider_id as PK
-    providers_df = providers_df.sort_values("provider_id").reset_index(drop=True)
-    save_df(providers_df, "providers")
-
-    # 3) Clinicians
-    print("\n[3/7] Generating clinicians...")
-    clinicians_df = generate_clinicians(
-        n_clinicians=N_CLINICIANS,
-        providers_df=providers_df,
-        seed=GLOBAL_SEED + 2,
-    )
-    # Expect clinician_id as PK, provider_id as FK
-    save_df(clinicians_df, "clinicians")
-
-    # 4) Encounters
-    print("\n[4/7] Generating encounters...")
-    encounters_df = generate_encounters(
-        patients_df=patients_df,
-        providers_df=providers_df,
-        clinicians_df=clinicians_df,
-        start_date=ANALYSIS_START,
-        end_date=ANALYSIS_END,
-        seed=GLOBAL_SEED + 3,
-    )
-    # Sanity checks on FKs
-    assert encounters_df["patient_id"].isin(patients_df["patient_id"]).all(), \
-        "Some encounter.patient_id not found in patients"
-    assert encounters_df["provider_id"].isin(providers_df["provider_id"]).all(), \
-        "Some encounter.provider_id not found in providers"
-    assert encounters_df["clinician_id"].isin(clinicians_df["clinician_id"]).all(), \
-        "Some encounter.clinician_id not found in clinicians"
-
-    save_df(encounters_df, "encounters")
-
-    # 5) Referrals
-    print("\n[5/7] Generating referrals...")
-    referrals_df = generate_referrals(
-        patients_df=patients_df,
-        providers_df=providers_df,
-        analysis_start=ANALYSIS_START,
-        analysis_end=ANALYSIS_END,
-        seed=GLOBAL_SEED + 4,
-    )
-    # Sanity-check FKs
-    if "patient_id" in referrals_df.columns:
-        assert referrals_df["patient_id"].isin(patients_df["patient_id"]).all(), \
-            "Some referral.patient_id not found in patients"
-    if "encounter_id" in referrals_df.columns:
-        assert referrals_df["encounter_id"].isin(encounters_df["encounter_id"]).all(), \
-            "Some referral.encounter_id not found in encounters"
-
-    save_df(referrals_df, "referrals")
-
-    # 6) Diagnostics
-    print("\n[6/7] Generating diagnostics...")
-    diagnostics_df = generate_diagnostics(
-        referrals_df=referrals_df,
-        patients_df=patients_df,
-        encounters_df=encounters_df,
-        seed=GLOBAL_SEED + 5,
-    )
-    if "patient_id" in diagnostics_df.columns:
-        assert diagnostics_df["patient_id"].isin(patients_df["patient_id"]).all(), \
-            "Some diagnostics.patient_id not found in patients"
-    if "encounter_id" in diagnostics_df.columns:
-        # Only validate encounter_ids that are populated (non-null).
-        mask = diagnostics_df["encounter_id"].notna()
-        if mask.any():
-            assert diagnostics_df.loc[mask, "encounter_id"].isin(
-                encounters_df["encounter_id"]
-            ).all(), \
-                "Some diagnostics.encounter_id not found in encounters"
-    diagnostics_df = apply_diagnostics_quality_issues(diagnostics_df, seed=GLOBAL_SEED + 5)
-
-    save_df(diagnostics_df, "diagnostics")
-
-    # 7) Urgent Care Logs
-    print("\n[7/7] Generating urgent care logs...")
-    urgent_logs_df = generate_urgent_care_logs(encounters_df, patients_df, providers_df, seed=99)
-    urgent_logs_df = degrade_urgent_care_quality(urgent_logs_df, seed=GLOBAL_SEED + 6)
-    
-    if "patient_id" in urgent_logs_df.columns:
-        assert urgent_logs_df["patient_id"].isin(patients_df["patient_id"]).all(), \
-            "Some urgent_care.patient_id not found in patients"
-    if "provider_id" in urgent_logs_df.columns:
-        assert urgent_logs_df["provider_id"].isin(providers_df["provider_id"]).all(), \
-            "Some urgent_care.provider_id not found in patients"
-    
-    save_df(urgent_logs_df, "urgent_care_logs")
-
-    print("\n🎉 Done. All synthetic datasets generated in:", OUTPUT_DIR)
-
-    # 7) Static Exports
-
-    print("=== Export files generation ===")
-    
-    print("\n[1/3] Generating appointments csv...")
-    start = date(2024, 12, 1)
-    end = date(2024, 12, 31)
-
-    current = start
-    while current <= end:
-        build_appointment_export(
-            encounters_df=encounters_df,
-            patients_df=patients_df,
-            export_date=current,
-            seed=GLOBAL_SEED + 7,
-        )
-        current += timedelta(days=1)
-
-    print(f"✅ Generated urgent care logs exports for {start} to {end}")
-
-    print("\n[2/3] Generating diagnostic orders csv...")
-    build_diagnoses_export(
-        diagnostics_df=diagnostics_df,
+    encounters = generate_encounters(
+        patients_df=patients,
+        providers_df=providers,
+        clinicians_df=clinicians,
+        start_date=cfg.start_date,
+        end_date=cfg.end_date,
+        seed=cfg.seed,
     )
 
-    print("✅ Generated diagnostic orders exports")
+    referrals = generate_referrals(encounters_df=encounters, providers_df=providers, seed=cfg.seed)
 
-    print("\n[3/3] Generating site information excel sheet...")
-    build_site_info_export(
-        providers_df=providers_df,
-        seed=GLOBAL_SEED + 8,
+    diagnostics = generate_diagnostics(
+        referrals_df=referrals,
+        patients_df=patients,
+        encounters_df=encounters,
+        seed=cfg.seed,
     )
 
-    print("✅ Generated site information excel sheet")
-    
-    print("=== Exporting files to required destination ===")
-
-    print("\n[1/2] Uploading diagnostic orders to s3...")
-    upload_exports_to_s3(
-        local_dir= Path("static_exports") / "s3_trust" / "diagnostics_orders",
-        bucket="northshire-trust-diagnostics-exports",
-        prefix="diagnostics_orders/",
+    urgent_care = generate_urgent_care_logs(
+        encounters_df=encounters,
+        patients_df=patients,
+        providers_df=providers,
+        seed=cfg.seed,
     )
 
-    print("✅ Uploaded diagnostic orders to s3.")
+    dfs = {
+        "patients": patients,
+        "providers": providers,
+        "clinicians": clinicians,
+        "encounters": encounters,
+        "referrals": referrals,
+        "diagnostics": diagnostics,
+        "urgent_care": urgent_care,
+    }
 
-    print("\n[2/2] Uploading providers reference file...")
-    upload_exports_to_s3(
-        local_dir= Path("static_exports") / "excel" / "sites_and_services_master.xlsx",
-        bucket="northshire-trust-reference-data",
-        prefix="providers/",
+    validate_dataset(dfs)
+
+    return dfs
+
+
+def build_exports(cfg: GenerationConfig, dfs: Dict[str, pd.DataFrame]) -> List[ExportArtifact]:
+    # Appointment nightly exports: last N days of the encounter window
+    appt_end = cfg.end_date
+    appt_start = appt_end - timedelta(days=cfg.appointment_export_days - 1)
+    export_dates = [appt_start + timedelta(days=i) for i in range(cfg.appointment_export_days)]
+
+    appointment_artifacts = build_appointment_exports(
+        encounters_df=dfs["encounters"],
+        patients_df=dfs["patients"],
+        export_dates=export_dates,
+        seed=cfg.seed,
     )
 
-    print("✅ Uploaded providers reference file to s3.")
-    
+    # Diagnostics daily exports: last N days of request_date
+    diag_df = dfs["diagnostics"].copy()
+    if not diag_df.empty:
+        diag_df["request_date"] = pd.to_datetime(diag_df["request_date"]).dt.date
+        diag_start = cfg.end_date - timedelta(days=cfg.diagnostics_export_days - 1)
+        diag_df = diag_df[(diag_df["request_date"] >= diag_start) & (diag_df["request_date"] <= cfg.end_date)]
 
+    diagnostics_artifacts = build_diagnostic_orders_exports(diag_df)
+
+    # Provider reference Excel (single artifact)
+    provider_excel = build_provider_reference_excel_artifact(
+        providers_df=dfs["providers"],
+        seed=cfg.seed,
+    )
+
+    return [*appointment_artifacts, *diagnostics_artifacts, provider_excel]
+
+
+def write_staging(dfs: Dict[str, pd.DataFrame], artifacts: List[ExportArtifact], staging_dir: Path) -> None:
+    core_dir = staging_dir / "core"
+    exports_dir = staging_dir / "exports"
+
+    # Core CSVs
+    write_csv(dfs["patients"], core_dir / "patients.csv")
+    write_csv(dfs["providers"], core_dir / "providers.csv")
+    write_csv(dfs["clinicians"], core_dir / "clinicians.csv")
+    write_csv(dfs["encounters"], core_dir / "encounters.csv")
+    write_csv(dfs["referrals"], core_dir / "referrals.csv")
+    write_csv(dfs["diagnostics"], core_dir / "diagnostics.csv")
+    write_csv(dfs["urgent_care"], core_dir / "urgent_care_logs.csv")
+
+    # Export artifacts (appointments/diagnostics/providers)
+    written = [write_artifact(a, exports_dir) for a in artifacts]
+
+    print(f"\n✅ Staging written:")
+    print(f"  core:    {core_dir.resolve()}")
+    print(f"  exports: {exports_dir.resolve()}")
+    print(f"  wrote {len(written)} export artifacts")
+
+
+# -------------------------
+# CLI
+# -------------------------
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Generate Northshire Trust synthetic datasets into staging.")
+    p.add_argument("--seed", type=int, default=DEFAULTS.seed)
+    p.add_argument("--n-patients", type=int, default=DEFAULTS.n_patients)
+    p.add_argument("--n-providers", type=int, default=DEFAULTS.n_providers)
+    p.add_argument("--start-date", type=str, default=str(DEFAULTS.start_date))
+    p.add_argument("--end-date", type=str, default=str(DEFAULTS.end_date))
+    p.add_argument("--appointment-export-days", type=int, default=DEFAULTS.appointment_export_days)
+    p.add_argument("--diagnostics-export-days", type=int, default=DEFAULTS.diagnostics_export_days)
+    p.add_argument("--staging-dir", type=str, default="data/staging")
+    return p.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+
+    cfg = GenerationConfig(
+        seed=args.seed,
+        n_patients=args.n_patients,
+        n_providers=args.n_providers,
+        start_date=date.fromisoformat(args.start_date),
+        end_date=date.fromisoformat(args.end_date),
+        appointment_export_days=args.appointment_export_days,
+        diagnostics_export_days=args.diagnostics_export_days,
+    )
+
+    staging_dir = Path(args.staging_dir)
+
+    print("\nGenerating core datasets...")
+    dfs = generate_core(cfg)
+
+    print("\nCore dataset summary:")
+    for name, df in dfs.items():
+        summarise(name, df)
+
+    print("\nBuilding export artifacts...")
+    artifacts = build_exports(cfg, dfs)
+    print(f"Export artifacts built: {len(artifacts)}")
+
+    print("\nWriting staging outputs...")
+    write_staging(dfs, artifacts, staging_dir)
+
+    print("\nDone.")
 
 
 if __name__ == "__main__":
