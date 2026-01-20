@@ -1,39 +1,244 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable, Optional, Literal
+
 import pandas as pd
-import numpy as np
-from psycopg2.extras import execute_values
-
-def load_table(conn, df, table_name, columns):
-    # Ensure object dtype so we can store None; replace NA/NaT with None
-    df = df.astype(object).where(pd.notnull(df), None)
-
-    def to_py(x):
-        if x is None:
-            return None
-        # pandas Timestamp -> python datetime
-        if isinstance(x, pd.Timestamp):
-            return x.to_pydatetime()
-        # numpy datetime64 -> python datetime
-        if isinstance(x, np.datetime64):
-            return pd.to_datetime(x).to_pydatetime()
-        # numpy numeric scalars -> python builtins
-        if isinstance(x, np.integer):
-            return int(x)
-        if isinstance(x, np.floating):
-            return float(x)
-        return x
-
-    rows = [tuple(to_py(v) for v in row) for row in df.values.tolist()]
-    sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES %s"
-
-    with conn.cursor() as cur:
-        execute_values(cur, sql, rows)
-    conn.commit()
+from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.engine import Engine
 
 
-def truncate_tables(conn, table_names):
-    # Truncate and reset serials for the provided tables
-    if not table_names:
-        return
-    with conn.cursor() as cur:
-        cur.execute(f"TRUNCATE TABLE {', '.join(table_names)} RESTART IDENTITY CASCADE;")
-    conn.commit()
+# -------------------------
+# Engine / Connections
+# -------------------------
+
+def make_engine(dsn: str) -> Engine:
+    """
+    Create a SQLAlchemy engine for Postgres.
+    pool_pre_ping avoids stale connections in longer-running scripts.
+    """
+    return create_engine(dsn, pool_pre_ping=True, future=True)
+
+
+# -------------------------
+# SQL execution
+# -------------------------
+
+def run_sql(engine: Engine, sql_text: str) -> None:
+    """
+    Execute SQL which may contain multiple statements, including DO $$ blocks.
+
+    Why raw_connection + cursor?
+    - SQLAlchemy's default execute expects single statements and can struggle with
+      multi-statement scripts + DO $$ blocks.
+    - Postgres can parse the full script correctly when sent as one string.
+    """
+    conn = engine.raw_connection()
+    try:
+        cur = conn.cursor()
+        try:
+            cur.execute(sql_text)
+        finally:
+            cur.close()
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def run_sql_file(engine: Engine, path: Path) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"SQL file not found: {path}")
+    run_sql(engine, path.read_text(encoding="utf-8"))
+
+
+# -------------------------
+# Introspection
+# -------------------------
+
+def table_exists(engine: Engine, table_name: str, schema: str = "public") -> bool:
+    insp = inspect(engine)
+    return insp.has_table(table_name, schema=schema)
+
+
+# -------------------------
+# Truncate / Reset
+# -------------------------
+
+def truncate_tables(engine: Engine, tables: Iterable[str]) -> None:
+    """
+    Truncate tables and reset identity sequences.
+
+    CASCADE is safe for this simulator and simplifies FK additions later.
+    """
+    with engine.begin() as conn:
+        for t in tables:
+            conn.execute(text(f'TRUNCATE TABLE "{t}" RESTART IDENTITY CASCADE;'))
+
+
+# -------------------------
+# Load helpers
+# -------------------------
+
+def load_df(
+    engine: Engine,
+    df: pd.DataFrame,
+    table: str,
+    *,
+    if_exists: Literal["append", "replace", "fail"] = "append",
+    chunksize: int = 10_000,
+) -> int:
+    """
+    Bulk load a DataFrame into Postgres using pandas.to_sql.
+
+    if_exists:
+      - "append" (default): add rows
+      - "replace": drop and recreate table (avoid for your internal schemas)
+      - "fail": error if table exists
+
+    Returns: number of rows written.
+    """
+    if df is None or df.empty:
+        return 0
+
+    df.to_sql(
+        name=table,
+        con=engine,
+        if_exists=if_exists,
+        index=False,
+        method="multi",
+        chunksize=chunksize,
+    )
+    return len(df)
+
+
+def load_csv(
+    engine: Engine,
+    csv_path: Path,
+    table: str,
+    *,
+    if_exists: Literal["append", "replace", "fail"] = "append",
+    chunksize: int = 50_000,
+    dtype: Optional[dict] = None,
+    usecols: Optional[list[str]] = None,
+) -> int:
+    """
+    Load a CSV into Postgres via pandas chunked reads.
+
+    Useful when staging outputs are CSV and you don't want to materialise
+    huge DataFrames in memory in one go.
+
+    Args:
+        engine: SQLAlchemy engine
+        csv_path: Path to CSV file
+        table: Target table name
+        if_exists: "append", "replace", or "fail"
+        chunksize: Rows per chunk
+        dtype: Optional dtype dict
+        usecols: Optional list of column names to keep. If provided, only these
+                columns will be loaded from the CSV (others ignored).
+
+    Returns: number of rows written.
+    """
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
+
+    total = 0
+    for chunk in pd.read_csv(csv_path, chunksize=chunksize, dtype=dtype, usecols=usecols):
+        if chunk.empty:
+            continue
+        # first chunk: honour if_exists, then append for subsequent
+        mode = if_exists if total == 0 else "append"
+        total += load_df(engine, chunk, table, if_exists=mode, chunksize=min(10_000, chunksize))
+
+    return total
+
+# -------------------------
+# Copy helpers (internal → mirror)
+# -------------------------
+
+def copy_table(
+    src_engine: Engine,
+    dst_engine: Engine,
+    table: str,
+    *,
+    read_chunksize: int = 50_000,
+    write_chunksize: int = 10_000,
+) -> int:
+    """
+    Copy a full table from src → dst in chunks.
+
+    Returns: number of rows copied.
+    """
+    total = 0
+    query = f'SELECT * FROM "{table}"'
+
+    for chunk in pd.read_sql_query(sql=text(query), con=src_engine, chunksize=read_chunksize):
+        if chunk.empty:
+            continue
+
+        chunk.to_sql(
+            name=table,
+            con=dst_engine,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=write_chunksize,
+        )
+        total += len(chunk)
+
+    return total
+
+
+@dataclass(frozen=True)
+class FullRefreshConfig:
+    """
+    Generic full refresh settings used by mirror refreshers.
+    """
+    schema_sql_path: Path
+    readonly_sql_path: Optional[Path] = None
+    tables: Optional[list[str]] = None
+    read_chunksize: int = 50_000
+    write_chunksize: int = 10_000
+
+
+def full_refresh_mirror(
+    *,
+    internal_dsn: str,
+    mirror_dsn: str,
+    cfg: FullRefreshConfig,
+) -> None:
+    """
+    Generic "ensure schema → truncate → copy → apply readonly" refresh.
+    Works for both EHR and urgent care mirrors.
+    """
+    internal = make_engine(internal_dsn)
+    mirror = make_engine(mirror_dsn)
+
+    try:
+        # Ensure schema exists
+        run_sql_file(mirror, cfg.schema_sql_path)
+
+        if not cfg.tables:
+            raise ValueError("cfg.tables must be provided for full_refresh_mirror()")
+
+        # Truncate then copy
+        truncate_tables(mirror, cfg.tables)
+
+        for t in cfg.tables:
+            rows = copy_table(
+                internal,
+                mirror,
+                t,
+                read_chunksize=cfg.read_chunksize,
+                write_chunksize=cfg.write_chunksize,
+            )
+            print(f"   - {t}: copied {rows:,} rows")
+
+        # Apply readonly grants if configured
+        if cfg.readonly_sql_path is not None:
+            run_sql_file(mirror, cfg.readonly_sql_path)
+
+    finally:
+        internal.dispose()
+        mirror.dispose()

@@ -23,19 +23,19 @@ from typing import Dict, List
 import pandas as pd
 
 # ---- generators (pure) ----
-from src.northshire_sim.generators.patients import generate_patients
-from src.northshire_sim.generators.providers import generate_providers
-from src.northshire_sim.generators.clinicians import generate_clinicians
-from src.northshire_sim.generators.encounters import generate_encounters
-from src.northshire_sim.generators.referrals import generate_referrals
-from src.northshire_sim.generators.diagnostics import generate_diagnostics
-from src.northshire_sim.generators.urgent_care import generate_urgent_care_logs
+from northshire_sim.generators.patients import generate_patients
+from northshire_sim.generators.providers import generate_providers
+from northshire_sim.generators.clinicians import generate_clinicians
+from northshire_sim.generators.encounters import generate_encounters
+from northshire_sim.generators.referrals import generate_referrals
+from northshire_sim.generators.diagnostics import generate_diagnostics
+from northshire_sim.generators.urgent_care import generate_urgent_care_logs
 
 # ---- validation (centralised) ----
-from src.northshire_sim.checks.validate import validate_dataset
+from northshire_sim.checks.validate import validate_dataset
 
 # ---- exports (pure transforms) ----
-from src.northshire_sim.exports.exports import (
+from northshire_sim.exports.exports import (
     ExportArtifact,
     build_appointment_exports,
     build_diagnostic_orders_exports,

@@ -1,42 +1,96 @@
-import pandas as pd
-import psycopg2
-from publishing.db import load_table, truncate_tables
+from __future__ import annotations
 
-def main():
-    # Always truncate target tables before loading to ensure overwrite behavior
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
-    conn = psycopg2.connect(
-        host="localhost",
-        port=5433,
-        dbname="ehr",
-        user="ehr_user",
-        password="ehr_password",
-    )
+from northshire_sim.publishing.db import make_engine, run_sql_file, truncate_tables, load_csv
 
-    patients = pd.read_csv("data/generated/patients.csv")
-    encounters = pd.read_csv(
-        "data/generated/encounters.csv",
-        parse_dates=[
-            "encounter_datetime_start",
-            "encounter_datetime_end",
-            "created_at",
-        ],
-    )
 
-    tables = {
-        "patient_demographics": (patients, list(patients.columns)),
-        "encounters": (encounters, list(encounters.columns)),
-    }
+EHR_TABLES_IN_LOAD_ORDER = (
+    "patient_demographics",
+    "encounters",
+    # TODO: still needed?
+    "diagnoses",
+    "procedures",
+)
 
-    # Always truncate (overwrite) before loading
-    truncate_tables(conn, list(tables.keys()))
-    print("Truncated tables:", ", ".join(tables.keys()))
 
-    for table_name, (df, cols) in tables.items():
-        print(f"Loading {table_name} ({len(df)} rows)...")
-        load_table(conn, df, table_name, cols)
+@dataclass(frozen=True)
+class EhrPublishConfig:
+    """
+    Loads staged core outputs into the INTERNAL EHR database (ehr_internal).
 
-    conn.close()
+    staging_core_dir: directory containing core CSVs produced by scripts/generate_data.py
+    init_sql_path: schema DDL used to ensure tables exist in ehr_internal
+    """
+    internal_dsn: str
+    staging_core_dir: Path = Path("data/staging/core")
+    init_sql_path: Path = Path("sql/ehr/init.sql")
 
-if __name__ == "__main__":
-    main()
+    truncate_before_load: bool = True
+    csv_chunksize: int = 50_000
+
+
+def publish_ehr_internal(cfg: EhrPublishConfig) -> None:
+    """
+    Load staged CSVs into ehr_internal.
+
+    Expected staging files:
+      - patients.csv -> patient_demographics
+      - encounters.csv -> encounters
+
+    Optional (only if you later stage these):
+      - diagnoses.csv -> diagnoses
+      - procedures.csv -> procedures
+    """
+    engine = make_engine(cfg.internal_dsn)
+    try:
+        print("1) Ensuring EHR internal schema exists...")
+        run_sql_file(engine, cfg.init_sql_path)
+
+        if cfg.truncate_before_load:
+            print("2) Truncating EHR internal tables...")
+            truncate_tables(engine, EHR_TABLES_IN_LOAD_ORDER)
+
+        print("3) Loading core EHR tables from staging...")
+
+        patients_csv = cfg.staging_core_dir / "patients.csv"
+        encounters_csv = cfg.staging_core_dir / "encounters.csv"
+
+        n_patients = load_csv(
+            engine,
+            patients_csv,
+            "patient_demographics",
+            if_exists="append",
+            chunksize=cfg.csv_chunksize,
+        )
+        print(f"   - patient_demographics: loaded {n_patients:,} rows")
+
+        n_enc = load_csv(
+            engine,
+            encounters_csv,
+            "encounters",
+            if_exists="append",
+            chunksize=cfg.csv_chunksize,
+        )
+        print(f"   - encounters: loaded {n_enc:,} rows")
+
+        # Optional: diagnoses/procedures if you generate them later
+        diagnoses_csv = cfg.staging_core_dir / "diagnoses.csv"
+        if diagnoses_csv.exists():
+            n_diag = load_csv(engine, diagnoses_csv, "diagnoses", if_exists="append", chunksize=cfg.csv_chunksize)
+            print(f"   - diagnoses: loaded {n_diag:,} rows")
+        else:
+            print("   - diagnoses: no staging file found (skipping)")
+
+        procedures_csv = cfg.staging_core_dir / "procedures.csv"
+        if procedures_csv.exists():
+            n_proc = load_csv(engine, procedures_csv, "procedures", if_exists="append", chunksize=cfg.csv_chunksize)
+            print(f"   - procedures: loaded {n_proc:,} rows")
+        else:
+            print("   - procedures: no staging file found (skipping)")
+
+        print("✅ EHR internal publish complete.")
+    finally:
+        engine.dispose()

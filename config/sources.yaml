@@ -1,0 +1,5 @@
+postgres:
+  ehr_internal_dsn: "postgresql+psycopg2://ehr_admin:ehr_admin_pw@localhost:5433/ehr"
+  ehr_mirror_dsn: "postgresql+psycopg2://mirror_admin:mirror_admin_pw@localhost:5434/ehr_mirror"
+  urgent_internal_dsn: "postgresql+psycopg2://urgent_admin:urgent_admin_pw@localhost:5435/urgent_care"
+  urgent_mirror_dsn: "postgresql+psycopg2://mirror_admin:mirror_admin_pw@localhost:5436/urgent_care_mirror"

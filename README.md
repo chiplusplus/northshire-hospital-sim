@@ -36,15 +36,12 @@ northshire-hospital-sim/
 │  ├─ checks/                    # sanity/consistency checks across dfs
 │  │  └─ validate.py
 │  │
-│  ├─ publishing/                # write to DB/S3/SFTP “drops”
-│  │  ├─ db.py                   # helpers: connect, truncate, bulk load
-│  │  ├─ ehr.py                  # load_ehr logic
-│  │  ├─ urgent_care.py          # load_logs logic
-│  │  ├─ s3.py                   # upload files to buckets
-│  │  └─ mirror.py               # refresh_ehr_mirror logic
-│  │
-│  └─ runtime/
-│     └─ paths.py                # where to put generated outputs locally
+│  └─ publishing/                # write to DB/S3/SFTP “drops”
+│     ├─ db.py                   # helpers: connect, truncate, bulk load
+│     ├─ ehr.py                  # load_ehr logic
+│     ├─ urgent_care.py          # load_logs logic
+│     ├─ s3.py                   # upload files to buckets
+│     └─ mirror.py               # refresh_ehr_mirror logic
 │
 ├─ scripts/                      # thin CLI entrypoints only
 │  ├─ generate_data.py           # orchestrates generators + checks + writes “staging” outputs
@@ -55,9 +52,9 @@ northshire-hospital-sim/
 │  └─ trust.py                   # one command: generate + publish everything
 │
 └─ data/                         # generated artefacts (gitignored)
-│  ├─ staging/                   # intermediate outputs (parquet/csv)
-│  ├─ sftp_drop/                 # local folder that simulates SFTP
-│  ├─ s3_exports/                # local cache of what's uploaded
-│  └─ logs/
+   ├─ staging/                   # intermediate outputs (parquet/csv)
+   ├─ sftp_drop/                 # local folder that simulates SFTP
+   ├─ s3_exports/                # local cache of what's uploaded
+   └─ logs/
 
 
