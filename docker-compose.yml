@@ -85,6 +85,22 @@ services:
       timeout: 5s
       retries: 5
 
+  sftp:
+    image: atmoz/sftp:alpine
+    container_name: northshire_sftp
+    ports:
+      - "2222:22"
+    volumes:
+      - ./data/sftp_drop:/home/trust_sftp/upload
+    command: >
+      trust_sftp:trust_sftp_pw:1001:1001:upload
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 22 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 # -----------------------------
 # VOLUMES
 # -----------------------------
