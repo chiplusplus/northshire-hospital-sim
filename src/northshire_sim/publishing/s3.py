@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import boto3
+import shutil
 from botocore.exceptions import ClientError
 
 
@@ -156,3 +157,41 @@ def ensure_bucket_exists(*, s3, bucket: str, region: str) -> None:
             )
     except ClientError:
         pass
+
+def cache_object(
+    *,
+    local_path: Path,
+    cache_root: Path,
+    bucket: str,
+    key: str,
+) -> Path:
+    """
+    Copy a local file to a local cache that mirrors S3 layout:
+      data/s3_exports/<bucket>/<key>
+
+    Returns the cached file path.
+    """
+    if not local_path.exists():
+        raise FileNotFoundError(f"Cannot cache missing file: {local_path}")
+
+    dest = cache_root / bucket / key
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(local_path, dest)
+    return dest
+
+
+def cache_bytes(
+    *,
+    payload_bytes: bytes,
+    cache_root: Path,
+    bucket: str,
+    key: str,
+) -> Path:
+    """
+    Write arbitrary bytes into the local cache mirroring S3 layout.
+    Useful for sidecar JSON created in-memory.
+    """
+    dest = cache_root / bucket / key
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(payload_bytes)
+    return dest
