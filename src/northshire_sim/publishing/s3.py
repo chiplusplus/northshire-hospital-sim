@@ -13,15 +13,47 @@ from botocore.exceptions import ClientError
 @dataclass(frozen=True)
 class S3Config:
     region: str = "eu-west-2"  
+    profile: Optional[str] = None  
     endpoint_url: Optional[str] = None  # e.g. for LocalStack
     kms_key_id: Optional[str] = None  # optional SSE-KMS
     use_sse_s3: bool = False  # SSE-S3 if True
 
+def _get_account_id(session: boto3.Session) -> str:
+    sts = session.client("sts")
+    return sts.get_caller_identity()["Account"]
 
-def make_s3_client(cfg: S3Config):
+def _assume_role(session: boto3.Session, role_arn: str, session_name: str) -> boto3.Session:
+    sts = session.client("sts")
+    resp = sts.assume_role(RoleArn=role_arn, RoleSessionName=session_name)
+    creds = resp["Credentials"]
+    return boto3.Session(
+        aws_access_key_id=creds["AccessKeyId"],
+        aws_secret_access_key=creds["SecretAccessKey"],
+        aws_session_token=creds["SessionToken"],
+    )
+
+def make_s3_client(cfg: S3Config, *, expected_account_id: str | None = None,
+                   assume_role_arn: str | None = None, assume_role_session_name: str = "northshire-hospital-sim"):
     session_kwargs = {}
+    if cfg.profile:
+        session_kwargs["profile_name"] = cfg.profile
 
-    session = boto3.Session(**session_kwargs)
+    base_session = boto3.Session(**session_kwargs)
+
+    # Optional: assume role into target account
+    session = base_session
+    if assume_role_arn:
+        session = _assume_role(base_session, assume_role_arn, assume_role_session_name)
+
+    # Safety check: ensure we're in the right account
+    if expected_account_id:
+        actual = _get_account_id(session)
+        if actual != expected_account_id:
+            raise RuntimeError(
+                f"AWS account mismatch. Expected {expected_account_id}, got {actual}. "
+                f"Refusing to upload."
+            )
+
     return session.client("s3", region_name=cfg.region, endpoint_url=cfg.endpoint_url)
 
 

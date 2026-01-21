@@ -13,6 +13,13 @@ sftp:
 
 s3:
   region: "eu-west-2"
+  profile: "northshire-trust"
+  expected_account_id: "911848242214"
+
+  # optional: use assume role (recommended)
+  assume_role_arn: "arn:aws:iam::911848242214:role/NorthshireS3Publisher"
+  assume_role_session_name: "northshire-hospital-sim"
+
   endpoint_url: null
   kms_key_id: null # optional
   use_sse_s3: true

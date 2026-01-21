@@ -68,7 +68,17 @@ def main() -> None:
         kms_key_id=kms_key_id,
         use_sse_s3=use_sse_s3,
     )
-    s3 = make_s3_client(cfg)
+
+    expected_account_id = s3_cfg_raw.get("expected_account_id")
+    assume_role_arn = s3_cfg_raw.get("assume_role_arn")
+    assume_role_session_name = s3_cfg_raw.get("assume_role_session_name")
+
+    s3 = make_s3_client(
+    cfg,
+    expected_account_id=expected_account_id,
+    assume_role_arn=assume_role_arn,
+    assume_role_session_name=assume_role_session_name or "northshire-hospital-sim",
+)
 
     if args.create_buckets_if_missing:
         ensure_bucket_exists(s3=s3, bucket=diagnostics_bucket, region=region)
