@@ -10,3 +10,17 @@ sftp:
   username: "trust_sftp"
   password: "trust_sftp_pw"
   outbound_root: "/upload/outbound"
+
+s3:
+  region: "eu-west-2"
+  endpoint_url: null
+  kms_key_id: null # optional
+  use_sse_s3: true
+
+  buckets:
+    diagnostics: "northshire-trust-diagnostics-exports"
+    providers: "northshire-trust-provider-reference"
+
+  prefixes:
+    diagnostics: "exports/diagnostics"
+    providers: "exports/providers"
