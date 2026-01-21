@@ -158,36 +158,36 @@ def load_csv(
 # -------------------------
 
 def copy_table(
-    src_engine: Engine,
-    dst_engine: Engine,
-    table: str,
-    *,
+    internal_conn,
+    mirror_conn,
+    table_name: str,
     read_chunksize: int = 50_000,
     write_chunksize: int = 10_000,
-) -> int:
-    """
-    Copy a full table from src → dst in chunks.
-
-    Returns: number of rows copied.
-    """
-    total = 0
-    query = f'SELECT * FROM "{table}"'
-
-    for chunk in pd.read_sql_query(sql=text(query), con=src_engine, chunksize=read_chunksize):
-        if chunk.empty:
-            continue
-
-        chunk.to_sql(
-            name=table,
-            con=dst_engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=write_chunksize,
-        )
-        total += len(chunk)
-
-    return total
+):
+    """Copy a table from internal to mirror with proper error handling."""
+    query = f"SELECT * FROM {table_name}"
+    
+    total_rows = 0
+    try:
+        for chunk in pd.read_sql(query, internal_conn, chunksize=read_chunksize):
+            try:
+                chunk.to_sql(
+                    table_name,
+                    mirror_conn,
+                    if_exists="append",
+                    index=False,
+                    chunksize=write_chunksize,
+                )
+                total_rows += len(chunk)
+            except Exception as e:
+                # Rollback the failed transaction
+                mirror_conn.rollback()
+                raise RuntimeError(f"Failed to write chunk to {table_name}: {e}") from e
+    except Exception as e:
+        mirror_conn.rollback()
+        raise
+    
+    return total_rows
 
 
 @dataclass(frozen=True)

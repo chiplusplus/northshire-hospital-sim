@@ -20,6 +20,9 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, List
 
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 import pandas as pd
 
 # ---- generators (pure) ----

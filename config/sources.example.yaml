@@ -1,0 +1,54 @@
+# -------------------------------------------------------------------
+# Example connection & destination configuration for Northshire Trust
+#
+# Copy this file to `config/sources.yaml` and replace placeholder values.
+# Do NOT commit real credentials.
+# -------------------------------------------------------------------
+
+postgres:
+  # Internal transactional databases (Trust-managed)
+  ehr_internal_dsn: "postgresql+psycopg2://ehr_admin:ehr_admin_pw@localhost:5433/ehr"
+  urgent_internal_dsn: "postgresql+psycopg2://urgent_admin:urgent_admin_pw@localhost:5435/urgent_care"
+
+  # Read-only mirrors exposed to external analytics platforms
+  ehr_mirror_dsn: "postgresql+psycopg2://ehr_readonly:ehr_readonly_pw@localhost:5434/ehr_mirror"
+  urgent_mirror_dsn: "postgresql+psycopg2://urgent_readonly:urgent_readonly_pw@localhost:5436/urgent_care_mirror"
+
+sftp:
+  # Secure file transfer endpoint for outbound appointment exports
+  host: "localhost"
+  port: 2222
+  username: "trust_sftp"
+  password: "trust_sftp_pw"
+  outbound_root: "/upload/outbound"
+
+s3:
+  # AWS region where Trust buckets are hosted
+  region: "eu-west-2"
+
+  # Named IAM profile used locally (configured via `aws configure --profile ...`)
+  profile: "northshire-trust"
+
+  # Safety check: publishing will fail if the AWS account ID does not match
+  expected_account_id: "123456789012"
+
+  # Optional (recommended): assume a scoped Trust role for publishing
+  assume_role_arn: "arn:aws:iam::123456789012:role/NorthshireS3Publisher"
+  assume_role_session_name: "northshire-hospital-sim"
+
+  # Optional: set only if using a non-AWS endpoint (e.g. LocalStack)
+  endpoint_url: null
+
+  # Optional encryption configuration
+  use_sse_s3: true
+  kms_key_id: null
+
+  # Trust-owned buckets
+  buckets:
+    diagnostics: "northshire-trust-diagnostics-exports"
+    providers: "northshire-trust-provider-reference"
+
+  # Key prefixes used for exports
+  prefixes:
+    diagnostics: "exports/diagnostics"
+    providers: "exports/providers"
