@@ -50,22 +50,18 @@ def main() -> None:
     kms_key_id = s3_cfg_raw.get("kms_key_id")
     use_sse_s3 = bool(s3_cfg_raw.get("use_sse_s3", False))
 
-    buckets = s3_cfg_raw.get("buckets", {})
-    diagnostics_bucket = buckets.get("diagnostics")
-    providers_bucket = buckets.get("providers")
+    bucket = s3_cfg_raw.get("bucket", {})
 
-    if not diagnostics_bucket or not providers_bucket:
+    if not bucket:
         raise KeyError(
-            "Missing bucket names in sources.yaml under:\n"
+            "Missing bucket name in sources.yaml under:\n"
             "s3:\n"
-            "  buckets:\n"
-            "    diagnostics: ...\n"
-            "    providers: ...\n"
+            "  bucket: ...\n"
         )
 
     prefixes = s3_cfg_raw.get("prefixes", {})
-    diagnostics_prefix = prefixes.get("diagnostics", "exports/diagnostics")
-    providers_prefix = prefixes.get("providers", "exports/providers")
+    diagnostics_prefix = prefixes.get("diagnostics", "diagnostics")
+    providers_prefix = prefixes.get("providers", "providers")
 
     cfg = S3Config(
         region=region,
@@ -86,8 +82,7 @@ def main() -> None:
 )
 
     if args.create_buckets_if_missing:
-        ensure_bucket_exists(s3=s3, bucket=diagnostics_bucket, region=region)
-        ensure_bucket_exists(s3=s3, bucket=providers_bucket, region=region)
+        ensure_bucket_exists(s3=s3, bucket=bucket, region=region)
 
     run_id = args.run_id or datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
@@ -105,7 +100,7 @@ def main() -> None:
 
         upload_file(
             s3=s3,
-            bucket=diagnostics_bucket,
+            bucket=bucket,
             key=key,
             local_path=f,
             content_type="text/csv",
@@ -124,7 +119,7 @@ def main() -> None:
         }
         upload_json_sidecar(
             s3=s3,
-            bucket=diagnostics_bucket,
+            bucket=bucket,
             key=sidecar_key,
             payload=sidecar_payload,
             cfg=cfg,
@@ -133,11 +128,11 @@ def main() -> None:
         cache_root = Path(args.cache_dir)
 
         if not args.no_cache:
-            cache_object(local_path=f, cache_root=cache_root, bucket=diagnostics_bucket, key=key)
+            cache_object(local_path=f, cache_root=cache_root, bucket=bucket, key=key)
             cache_bytes(
                 payload_bytes=json.dumps(sidecar_payload, indent=2, default=str).encode("utf-8"),
                 cache_root=cache_root,
-                bucket=diagnostics_bucket,
+                bucket=bucket,
                 key=sidecar_key,
             )
 
@@ -154,7 +149,7 @@ def main() -> None:
 
         upload_file(
             s3=s3,
-            bucket=providers_bucket,
+            bucket=bucket,
             key=key,
             local_path=provider_xlsx,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -171,7 +166,7 @@ def main() -> None:
         }
         upload_json_sidecar(
             s3=s3,
-            bucket=providers_bucket,
+            bucket=bucket,
             key=sidecar_key,
             payload=sidecar_payload,
             cfg=cfg,
@@ -180,19 +175,19 @@ def main() -> None:
         cache_root = Path(args.cache_dir)
 
         if not args.no_cache:
-            cache_object(local_path=provider_xlsx, cache_root=cache_root, bucket=providers_bucket, key=key)
+            cache_object(local_path=provider_xlsx, cache_root=cache_root, bucket=bucket, key=key)
             cache_bytes(
                 payload_bytes=json.dumps(sidecar_payload, indent=2, default=str).encode("utf-8"),
                 cache_root=cache_root,
-                bucket=providers_bucket,
+                bucket=bucket,
                 key=sidecar_key,
             )
 
         uploaded_providers = 1
 
     print("✅ Published to S3:")
-    print(f"  diagnostics exports: {uploaded_diag} files → s3://{diagnostics_bucket}/{diagnostics_prefix}/...")
-    print(f"  provider reference: {uploaded_providers} file → s3://{providers_bucket}/{providers_prefix}/...")
+    print(f"  diagnostics exports: {uploaded_diag} files → s3://{bucket}/{diagnostics_prefix}/...")
+    print(f"  provider reference: {uploaded_providers} file → s3://{bucket}/{providers_prefix}/...")
 
 
 if __name__ == "__main__":

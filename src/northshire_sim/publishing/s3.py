@@ -148,7 +148,7 @@ def ensure_bucket_exists(*, s3, bucket: str, region: str) -> None:
 
     # Try to create (will fail if you don't have perms — that's fine)
     try:
-        if region == "us-east-1":
+        if region == "eu-west-1":
             s3.create_bucket(Bucket=bucket)
         else:
             s3.create_bucket(

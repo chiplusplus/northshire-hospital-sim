@@ -46,10 +46,10 @@ publish-s3:
 	$(PY) scripts/publish_s3.py --sources config/sources.yaml --staging-exports data/staging/exports --create-buckets-if-missing
 
 trust:
-	$(PY) scripts/trust.py --start-services --create-buckets-if-missing
+	$(PY) scripts/trust.py --start-services --create-buckets-if-missing $(ARGS)
 
 trust-fast:
-	$(PY) scripts/trust.py --create-buckets-if-missing
+	$(PY) scripts/trust.py --create-buckets-if-missing $(ARGS)
 reset: 
 	docker compose down -v
 	rm -rf data/staging data/sftp_drop data/s3_exports

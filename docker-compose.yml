@@ -85,6 +85,9 @@ services:
       timeout: 5s
       retries: 5
 
+  # -----------------------------
+  # SFTP SERVER
+  # -----------------------------
   sftp:
     image: atmoz/sftp:alpine
     container_name: northshire_sftp

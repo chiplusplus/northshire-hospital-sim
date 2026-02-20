@@ -24,10 +24,8 @@ s3:
   kms_key_id: null # optional
   use_sse_s3: true
 
-  buckets:
-    diagnostics: "northshire-trust-diagnostics-exports"
-    providers: "northshire-trust-provider-reference"
+  bucket: "northshire-trust-external-exports"
 
   prefixes:
-    diagnostics: "exports/diagnostics"
-    providers: "exports/providers"
+    diagnostics: "diagnostics"
+    providers: "providers"
