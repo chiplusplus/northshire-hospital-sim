@@ -3,7 +3,7 @@
 A lightweight “client-side” simulator for the **Northshire NHS Trust** case study.  
 This repo exists to expose realistic upstream data sources that the analytics platform (**access-iq**) ingests into S3 Bronze.
 
-This is **not** the main portfolio repo — it’s the simulated client environment so the engineering work in **access-iq** can build on a solid, real-world-esque base.
+This is **not** the main portfolio repo - it’s the simulated client environment so the engineering work in **access-iq** can build on a solid, real-world-esque base.
 
 ---
 
@@ -122,6 +122,16 @@ northshire-hospital-sim/
 
 ---
 
+## Useful Commands
+Command	When to use
+make trust-init	Start of session — deploys everything from scratch
+make trust-init-no-sftp	Same, without the $0.30/hr Transfer Family
+make trust-seed	CDK already up, re-do DB init + generate + publish
+make trust-regen	CDK + DB up, re-generate data + publish
+make trust-repub	CDK + DB + data exists, just re-publish
+make trust-down	End of session — kills tunnel + destroys infra
+
+---
 ## Notes
 - All generated artefacts live under `data/` (gitignored)
 - Mirrors enforce read-only access

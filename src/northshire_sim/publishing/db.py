@@ -86,7 +86,7 @@ def load_df(
     table: str,
     *,
     if_exists: Literal["append", "replace", "fail"] = "append",
-    chunksize: int = 10_000,
+    chunksize: int = 1_000,
 ) -> int:
     """
     Bulk load a DataFrame into Postgres using pandas.to_sql.
@@ -149,7 +149,7 @@ def load_csv(
             continue
         # first chunk: honour if_exists, then append for subsequent
         mode = if_exists if total == 0 else "append"
-        total += load_df(engine, chunk, table, if_exists=mode, chunksize=min(10_000, chunksize))
+        total += load_df(engine, chunk, table, if_exists=mode, chunksize=min(1_000, chunksize))
 
     return total
 
@@ -199,7 +199,7 @@ class FullRefreshConfig:
     readonly_sql_path: Optional[Path] = None
     tables: Optional[list[str]] = None
     read_chunksize: int = 50_000
-    write_chunksize: int = 10_000
+    write_chunksize: int = 1_000
 
 
 def full_refresh_mirror(

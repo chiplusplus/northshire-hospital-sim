@@ -1,4 +1,4 @@
-# Northshire Hospital Sim — End-to-End Test Runbook
+# Northshire Hospital Sim - End-to-End Test Runbook
 
 ## 0) Preconditions
 

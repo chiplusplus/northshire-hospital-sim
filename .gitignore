@@ -209,3 +209,12 @@ __marimo__/
 # Project Specific
 data/
 config/sources.yaml
+
+# CDK
+cdk.out/
+infra/cdk.out/
+infra/cdk-outputs.json
+infra/.cdk.staging/
+
+# SSM tunnel PID (written by aws_trust_up.py)
+.tunnel.pid

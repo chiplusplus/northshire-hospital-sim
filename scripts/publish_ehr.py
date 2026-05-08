@@ -29,7 +29,7 @@ def parse_args() -> argparse.Namespace:
     p.set_defaults(truncate=True)
     p.add_argument("--csv-chunksize", type=int, default=50_000)
     p.add_argument("--read-chunksize", type=int, default=50_000, help="Mirror read chunksize")
-    p.add_argument("--write-chunksize", type=int, default=10_000, help="Mirror write chunksize")
+    p.add_argument("--write-chunksize", type=int, default=1_000, help="Mirror write chunksize")
     return p.parse_args()
 
 

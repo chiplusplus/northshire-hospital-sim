@@ -13,7 +13,7 @@ def ensure_dir(path: Path) -> None:
 def copy_files(src_glob: str, dst_dir: Path) -> int:
     ensure_dir(dst_dir)
     count = 0
-    for f in sorted(Path().glob(src_glob)):
+    for f in sorted(Path(src_glob).parent.glob(Path(src_glob).name)):
         if f.is_file():
             shutil.copy2(f, dst_dir / f.name)
             count += 1

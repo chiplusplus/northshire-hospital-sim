@@ -1,31 +1,23 @@
 postgres:
-  ehr_internal_dsn: "postgresql+psycopg2://ehr_admin:ehr_admin_pw@localhost:5433/ehr"
-  ehr_mirror_dsn: "postgresql+psycopg2://mirror_admin:mirror_admin_pw@localhost:5434/ehr_mirror"
-  urgent_internal_dsn: "postgresql+psycopg2://urgent_admin:urgent_admin_pw@localhost:5435/urgent_care"
-  urgent_mirror_dsn: "postgresql+psycopg2://mirror_admin:mirror_admin_pw@localhost:5436/urgent_care_mirror"
-
+  ehr_internal_dsn: postgresql+psycopg2://trust_admin:bhKyMjkgNtseOlE3UH%3Did%3D1%5Eq_-A%5Et@localhost:5433/ehr
+  urgent_internal_dsn: postgresql+psycopg2://trust_admin:bhKyMjkgNtseOlE3UH%3Did%3D1%5Eq_-A%5Et@localhost:5433/urgent_care
+  ehr_mirror_dsn: postgresql+psycopg2://trust_admin:bhKyMjkgNtseOlE3UH%3Did%3D1%5Eq_-A%5Et@localhost:5433/ehr_mirror
+  urgent_mirror_dsn: postgresql+psycopg2://trust_admin:bhKyMjkgNtseOlE3UH%3Did%3D1%5Eq_-A%5Et@localhost:5433/urgent_care_mirror
 sftp:
-  host: "localhost"
-  port: 2222
-  username: "trust_sftp"
-  password: "trust_sftp_pw"
-  outbound_root: "/upload/outbound"
-
+  host: s-86d6cef7383746839.server.transfer.eu-west-2.amazonaws.com
+  port: 22
+  username: trust_sftp
+  password: w2U08nB2RGbQ54YqocjQFwa3exMlJTG0
+  outbound_root: /outbound
 s3:
-  region: "eu-west-2"
-  profile: "northshire-trust"
-  expected_account_id: "911848242214"
-
-  # optional: use assume role (recommended)
-  assume_role_arn: "arn:aws:iam::911848242214:role/NorthshireS3Publisher"
-  assume_role_session_name: "northshire-hospital-sim"
-
+  region: eu-west-2
+  profile: northshire-trust
+  assume_role_arn: arn:aws:iam::911848242214:role/NorthshireS3Publisher
+  assume_role_session_name: northshire-hospital-sim
   endpoint_url: null
-  kms_key_id: null # optional
   use_sse_s3: true
-
-  bucket: "northshire-trust-external-exports"
-
+  kms_key_id: null
+  bucket: northshire-trust-exports-911848242214
   prefixes:
-    diagnostics: "diagnostics"
-    providers: "providers"
+    diagnostics: diagnostics
+    providers: providers

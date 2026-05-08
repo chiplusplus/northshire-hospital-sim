@@ -136,7 +136,7 @@ def upload_json_sidecar(
 def ensure_bucket_exists(*, s3, bucket: str, region: str) -> None:
     """
     For the simulator, it's convenient to create the bucket if missing.
-    On real Trust AWS, you usually won't have permission — but this is optional.
+    On real Trust AWS, you usually won't have permission - but this is optional.
     """
     try:
         s3.head_bucket(Bucket=bucket)
@@ -146,7 +146,7 @@ def ensure_bucket_exists(*, s3, bucket: str, region: str) -> None:
         if code not in ("404", "NoSuchBucket", "403"):
             raise
 
-    # Try to create (will fail if you don't have perms — that's fine)
+    # Try to create (will fail if you don't have perms - that's fine)
     try:
         if region == "eu-west-1":
             s3.create_bucket(Bucket=bucket)

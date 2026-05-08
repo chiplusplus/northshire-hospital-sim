@@ -41,7 +41,7 @@ class MirrorRefreshConfig:
 
     # Copy tuning
     read_chunksize: int = 50_000
-    write_chunksize: int = 10_000
+    write_chunksize: int = 1_000
 
     # Schema + permissions scripts
     mirror_schema_sql_path: Path = Path()
@@ -54,7 +54,7 @@ def refresh_ehr_mirror(
     mirror_dsn: str,
     tables: Sequence[str] = DEFAULT_EHR_TABLES,
     read_chunksize: int = 50_000,
-    write_chunksize: int = 10_000,
+    write_chunksize: int = 1_000,
     mirror_schema_sql_path: Path = Path("sql/ehr/init.sql"),
     mirror_readonly_sql_path: Path = Path("sql/ehr/init_mirror_readonly.sql"),
 ) -> None:
@@ -84,7 +84,7 @@ def refresh_urgent_care_mirror(
     mirror_dsn: str,
     tables: Sequence[str] = DEFAULT_URGENT_TABLES,
     read_chunksize: int = 50_000,
-    write_chunksize: int = 10_000,
+    write_chunksize: int = 1_000,
     mirror_schema_sql_path: Path = Path("sql/urgent_care/init.sql"),
     mirror_readonly_sql_path: Path = Path("sql/urgent_care/init_mirror_readonly.sql"),
 ) -> None:

@@ -17,12 +17,14 @@ postgres:
   urgent_internal_dsn: "postgresql+psycopg2://<URGENT_ADMIN_USER>:<URGENT_ADMIN_PASSWORD>@localhost:5435/urgent_care"
 
   # -----------------------------------------------------------------
-  # Read-only mirrors exposed to external analytics platforms
-  # These are the DSNs that access-iq will later connect to.
+  # Admin connections to the mirror databases.
+  # Used by the publishing scripts to CREATE tables and COPY data in.
+  # The Platform (access-iq) uses its own config with the read-only
+  # credentials; these are NOT the same as the access-iq DSNs.
   # -----------------------------------------------------------------
 
-  ehr_mirror_dsn: "postgresql+psycopg2://<EHR_READONLY_USER>:<EHR_READONLY_PASSWORD>@localhost:5434/ehr_mirror"
-  urgent_mirror_dsn: "postgresql+psycopg2://<URGENT_READONLY_USER>:<URGENT_READONLY_PASSWORD>@localhost:5436/urgent_care_mirror"
+  ehr_mirror_dsn: "postgresql+psycopg2://<ADMIN_USER>:<ADMIN_PASSWORD>@localhost:5433/ehr_mirror"
+  urgent_mirror_dsn: "postgresql+psycopg2://<ADMIN_USER>:<ADMIN_PASSWORD>@localhost:5433/urgent_care_mirror"
 
 sftp:
   # -----------------------------------------------------------------
@@ -74,13 +76,12 @@ s3:
   kms_key_id: null
 
   # -----------------------------------------------------------------
-  # Trust-owned buckets and key prefixes
+  # Trust-owned bucket and key prefixes
+  # A single bucket hosts both diagnostics and provider reference exports.
   # -----------------------------------------------------------------
 
-  buckets:
-    diagnostics: "<DIAGNOSTICS_BUCKET_NAME>"
-    providers: "<PROVIDERS_BUCKET_NAME>"
+  bucket: "<TRUST_EXPORTS_BUCKET_NAME>"
 
   prefixes:
-    diagnostics: "exports/diagnostics"
-    providers: "exports/providers"
+    diagnostics: "diagnostics"
+    providers: "providers"
