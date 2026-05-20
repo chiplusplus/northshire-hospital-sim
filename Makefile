@@ -1,4 +1,4 @@
-.PHONY: help up down logs trust trust-fast generate publish-ehr publish-urgent publish-sftp publish-s3 reset reset-soft cdk-synth cdk-deploy cdk-destroy gen-sources trust-up trust-down trust-init trust-init-no-sftp trust-seed trust-regen trust-repub
+.PHONY: help up down logs trust trust-fast generate publish-ehr publish-urgent publish-sftp publish-s3 reset reset-soft cdk-synth cdk-deploy cdk-deploy-no-sftp cdk-destroy gen-sources trust-bootstrap trust-bootstrap-no-sftp trust-seed trust-destroy
 
 PY=python3
 CDK_DIR=infra
@@ -20,20 +20,18 @@ help:
 	@echo "  reset          - Full reset: stop containers, remove volumes, delete all generated artefacts"
 	@echo "  reset-soft     - Soft reset: delete generated artefacts only (keeps containers/volumes)"
 	@echo ""
-	@echo "AWS CDK targets:"
+	@echo "AWS targets:"
+	@echo "  trust-bootstrap            - Do everything: deploy + DB setup + generate + publish"
+	@echo "  trust-bootstrap-no-sftp    - Same, without Transfer Family (saves ~$$0.30/hr)"
+	@echo "  cdk-deploy                 - Deploy infrastructure only"
+	@echo "  cdk-deploy-no-sftp         - Deploy without Transfer Family"
+	@echo "  trust-seed                 - Seed data into already-deployed infra"
+	@echo "  trust-destroy              - Kill tunnel + destroy all AWS infra"
+	@echo ""
+	@echo "AWS utilities:"
 	@echo "  cdk-synth          - Synthesise CloudFormation (no deploy)"
-	@echo "  cdk-deploy         - Deploy full stack (RDS + SFTP + S3 + VPC)"
-	@echo "  cdk-deploy-no-sftp - Deploy without Transfer Family (saves ~$$0.30/hr)"
 	@echo "  cdk-destroy        - Destroy all AWS resources"
 	@echo "  gen-sources        - Write config/sources.yaml from CDK outputs"
-	@echo "  trust-up             - Deploy infra + write sources.yaml"
-	@echo "  trust-up-no-sftp     - Deploy without SFTP + write sources.yaml"
-	@echo "  trust-init           - Full bootstrap: deploy + DB setup + generate + publish"
-	@echo "  trust-init-no-sftp   - Full bootstrap without Transfer Family"
-	@echo "  trust-seed           - DB setup + generate + publish (skip CDK deploy)"
-	@echo "  trust-regen          - Generate + publish (skip deploy + DB setup)"
-	@echo "  trust-repub          - Publish only (skip deploy + DB setup + generate)"
-	@echo "  trust-down           - Kill tunnel + destroy all AWS infra"
 
 up:
 	docker compose up -d
@@ -92,27 +90,15 @@ cdk-destroy:
 gen-sources:
 	$(PY) scripts/export_outputs.py --cdk-outputs $(CDK_OUTPUTS) --sources config/sources.yaml --profile northshire-trust
 
-trust-up: cdk-deploy gen-sources
-
-trust-up-no-sftp: cdk-deploy-no-sftp gen-sources
-
-# Full bootstrap: deploy infra + DB setup + generate data + publish everything
-trust-init:
+trust-bootstrap:
 	$(PY) scripts/aws_trust_up.py $(ARGS)
 
-trust-init-no-sftp:
+trust-bootstrap-no-sftp:
 	$(PY) scripts/aws_trust_up.py --no-sftp $(ARGS)
 
-# Partial bootstraps — assume CDK stack is already deployed
 trust-seed:
 	$(PY) scripts/aws_trust_up.py --skip-deploy $(ARGS)
 
-trust-regen:
-	$(PY) scripts/aws_trust_up.py --skip-deploy --skip-db-setup $(ARGS)
-
-trust-repub:
-	$(PY) scripts/aws_trust_up.py --skip-deploy --skip-db-setup --skip-generate $(ARGS)
-
-trust-down:
+trust-destroy:
 	-kill $$(cat .tunnel.pid 2>/dev/null) 2>/dev/null; rm -f .tunnel.pid
 	cd $(CDK_DIR) && cdk destroy --force
