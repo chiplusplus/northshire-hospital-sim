@@ -12,6 +12,12 @@ from aws_cdk import (
     aws_secretsmanager as secretsmanager,
     aws_transfer as transfer,
 )
+from aws_cdk.custom_resources import (
+    AwsCustomResource,
+    AwsCustomResourcePolicy,
+    AwsSdkCall,
+    PhysicalResourceId,
+)
 from constructs import Construct
 
 
@@ -23,6 +29,7 @@ class NorthshireTrustStack(Stack):
         platform_vpc_id = self.node.try_get_context("platformVpcId") or ""
         platform_cidr = self.node.try_get_context("platformCidr") or ""
         platform_account = self.node.try_get_context("platformAccountId") or ""
+        peering_connection_id = self.node.try_get_context("peeringConnectionId") or ""
 
         peering_enabled = bool(platform_vpc_id and platform_cidr)
 
@@ -97,6 +104,37 @@ class NorthshireTrustStack(Stack):
                 peer=ec2.Peer.ipv4(platform_cidr),
                 connection=ec2.Port.tcp(22),
                 description="Platform SFTP access via peering",
+            )
+
+        # ── VPC Peering Routes & DNS ─────────────────────────────────────────
+        if peering_enabled and peering_connection_id:
+            for i, subnet in enumerate(vpc.isolated_subnets):
+                ec2.CfnRoute(
+                    self,
+                    f"PlatformRoute{i}",
+                    route_table_id=subnet.route_table.route_table_id,
+                    destination_cidr_block=platform_cidr,
+                    vpc_peering_connection_id=peering_connection_id,
+                )
+
+            AwsCustomResource(
+                self,
+                "PeeringDnsAccepter",
+                on_create=AwsSdkCall(
+                    service="EC2",
+                    action="modifyVpcPeeringConnectionOptions",
+                    parameters={
+                        "VpcPeeringConnectionId": peering_connection_id,
+                        "AccepterPeeringConnectionOptions": {
+                            "AllowDnsResolutionFromRemoteVpc": True,
+                        },
+                    },
+                    physical_resource_id=PhysicalResourceId.of(
+                        "peering-dns-accepter"
+                    ),
+                ),
+                policy=AwsCustomResourcePolicy.from_sdk_calls(resources=["*"]),
+                install_latest_aws_sdk=False,
             )
 
         # ── Secrets ───────────────────────────────────────────────────────────
@@ -401,7 +439,7 @@ class NorthshireTrustStack(Stack):
                 for subnet in vpc.isolated_subnets
             ),
             export_name="NorthshireTrust-IsolatedRouteTableIds",
-            description="Comma-separated isolated subnet route table IDs (for Platform -c trust_route_table_ids=...)",
+            description="Comma-separated isolated subnet route table IDs",
         )
         CfnOutput(self, "RdsEndpoint",
             value=db_instance.instance_endpoint.hostname,
