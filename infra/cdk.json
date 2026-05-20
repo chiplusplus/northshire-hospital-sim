@@ -9,10 +9,10 @@
     "@aws-cdk/core:stackRelativeExports": true,
     "@aws-cdk/aws-rds:lowercaseDbIdentifier": false,
     "trustRegion": "eu-west-2",
-    "trustCidr": "10.10.0.0/16",
+    "trustCidr": "10.0.0.0/16",
     "platformVpcId": "",
-    "platformCidr": "",
-    "platformAccountId": "",
+    "platformCidr": "10.10.0.0/16",
+    "platformAccountId": "222308823356",
     "deployTransferFamily": true
   }
 }

@@ -355,36 +355,53 @@ class NorthshireTrustStack(Stack):
                 tags=[cdk.CfnTag(key="Project", value="access-iq")],
             )
 
-        # ── VPC Peering (conditional) ─────────────────────────────────────────
-        peering = None
-        if peering_enabled:
-            peering = ec2.CfnVPCPeeringConnection(
+        # ── Peering Accepter Role (for Platform account cross-account automation) ──
+        if platform_account:
+            peering_accepter_role = iam.Role(
                 self,
-                "TrustToPlatformPeering",
-                vpc_id=vpc.vpc_id,
-                peer_vpc_id=platform_vpc_id,
-                peer_owner_id=platform_account,
-                peer_region=self.region,
-                tags=[
-                    cdk.CfnTag(key="Project", value="access-iq"),
-                    cdk.CfnTag(key="Name", value="northshire-trust-to-platform"),
-                ],
+                "PeeringAccepterRole",
+                role_name="access-iq-peering-accepter",
+                assumed_by=iam.AccountPrincipal(platform_account),
+                description="Allows Platform account to manage VPC peering lifecycle",
+                max_session_duration=cdk.Duration.hours(1),
+            )
+            peering_accepter_role.add_to_policy(
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "ec2:AcceptVpcPeeringConnection",
+                        "ec2:CreateRoute",
+                        "ec2:DeleteRoute",
+                        "ec2:ModifyVpcPeeringConnectionOptions",
+                    ],
+                    resources=["*"],
+                    conditions={
+                        "StringEquals": {
+                            "aws:RequestedRegion": self.region,
+                        }
+                    },
+                )
             )
 
-            for i, subnet in enumerate(vpc.isolated_subnets):
-                ec2.CfnRoute(
-                    self,
-                    f"RouteToPlatform{i}",
-                    route_table_id=subnet.route_table.route_table_id,
-                    destination_cidr_block=platform_cidr,
-                    vpc_peering_connection_id=peering.ref,
-                )
+            CfnOutput(self, "PeeringAccepterRoleArn",
+                value=peering_accepter_role.role_arn,
+                export_name="NorthshireTrust-PeeringAccepterRoleArn",
+                description="IAM role ARN for Platform cross-account peering automation",
+            )
 
         # ── Outputs ───────────────────────────────────────────────────────────
         CfnOutput(self, "VpcId",
             value=vpc.vpc_id,
             export_name="NorthshireTrust-VpcId",
             description="Trust VPC ID",
+        )
+        CfnOutput(self, "IsolatedRouteTableIds",
+            value=",".join(
+                subnet.route_table.route_table_id
+                for subnet in vpc.isolated_subnets
+            ),
+            export_name="NorthshireTrust-IsolatedRouteTableIds",
+            description="Comma-separated isolated subnet route table IDs (for Platform -c trust_route_table_ids=...)",
         )
         CfnOutput(self, "RdsEndpoint",
             value=db_instance.instance_endpoint.hostname,
@@ -442,10 +459,4 @@ class NorthshireTrustStack(Stack):
                 value=sftp_user_secret.secret_arn,
                 export_name="NorthshireTrust-SftpUserSecretArn",
                 description="SFTP user credentials",
-            )
-        if peering:
-            CfnOutput(self, "PeeringConnectionId",
-                value=peering.ref,
-                export_name="NorthshireTrust-PeeringConnectionId",
-                description="VPC peering connection ID (Trust → Platform)",
             )
