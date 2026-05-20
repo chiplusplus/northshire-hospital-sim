@@ -225,7 +225,7 @@ def main() -> None:
         deploy_cmd = [
             "cdk", "deploy",
             "--outputs-file", "cdk-outputs.json",
-            "--require-approval", "broadening",
+            "--require-approval", "never",
         ]
         if args.no_sftp:
             deploy_cmd += ["-c", "deployTransferFamily=false"]

@@ -1,13 +1,13 @@
 postgres:
-  ehr_internal_dsn: postgresql+psycopg2://trust_admin:U_jrNjSHiyTuiI%2C0t2Bw4n.MrPLydP@localhost:5433/ehr
-  urgent_internal_dsn: postgresql+psycopg2://trust_admin:U_jrNjSHiyTuiI%2C0t2Bw4n.MrPLydP@localhost:5433/urgent_care
-  ehr_mirror_dsn: postgresql+psycopg2://trust_admin:U_jrNjSHiyTuiI%2C0t2Bw4n.MrPLydP@localhost:5433/ehr_mirror
-  urgent_mirror_dsn: postgresql+psycopg2://trust_admin:U_jrNjSHiyTuiI%2C0t2Bw4n.MrPLydP@localhost:5433/urgent_care_mirror
+  ehr_internal_dsn: postgresql+psycopg2://trust_admin:t_lnl.%5EC-MA3jXJhyuBUs-a4.8aHSr@localhost:5433/ehr
+  urgent_internal_dsn: postgresql+psycopg2://trust_admin:t_lnl.%5EC-MA3jXJhyuBUs-a4.8aHSr@localhost:5433/urgent_care
+  ehr_mirror_dsn: postgresql+psycopg2://trust_admin:t_lnl.%5EC-MA3jXJhyuBUs-a4.8aHSr@localhost:5433/ehr_mirror
+  urgent_mirror_dsn: postgresql+psycopg2://trust_admin:t_lnl.%5EC-MA3jXJhyuBUs-a4.8aHSr@localhost:5433/urgent_care_mirror
 sftp:
-  host: s-bc5c2c212e914725b.server.transfer.eu-west-2.amazonaws.com
+  host: s-df0e67cf50c74e36a.server.transfer.eu-west-2.amazonaws.com
   port: 22
   username: trust_sftp
-  password: FG6RCJQS5rUs6zYaM7qFf0WHjtZ6aZbK
+  password: fU9WekNOnB9aDiKTux6qVbwf3A1cc5k3
   outbound_root: /outbound
 s3:
   region: eu-west-2

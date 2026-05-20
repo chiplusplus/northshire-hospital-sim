@@ -1,7 +1,9 @@
 .PHONY: help up down logs trust trust-fast generate publish-ehr publish-urgent publish-sftp publish-s3 reset reset-soft cdk-synth cdk-deploy cdk-deploy-no-sftp cdk-destroy gen-sources trust-bootstrap trust-bootstrap-no-sftp trust-seed trust-destroy
 
-PY=python3
+VENV=.northshire-hospital-sim
+PY=$(VENV)/bin/python
 CDK_DIR=infra
+ACTIVATE=. $(VENV)/bin/activate &&
 CDK_OUTPUTS=$(CDK_DIR)/cdk-outputs.json
 
 help:
@@ -75,17 +77,17 @@ reset-soft:
 # ── AWS CDK ───────────────────────────────────────────────────────────────────
 
 cdk-synth:
-	cd $(CDK_DIR) && cdk synth
+	cd $(CDK_DIR) && $(ACTIVATE) cdk synth
 
 cdk-deploy:
-	cd $(CDK_DIR) && cdk deploy --outputs-file cdk-outputs.json --require-approval broadening
+	cd $(CDK_DIR) && $(ACTIVATE) cdk deploy --outputs-file cdk-outputs.json --require-approval broadening
 
 # Skip Transfer Family ($0.30/hr) - use when only testing EHR or S3 flows
 cdk-deploy-no-sftp:
-	cd $(CDK_DIR) && cdk deploy --outputs-file cdk-outputs.json --require-approval broadening -c deployTransferFamily=false
+	cd $(CDK_DIR) && $(ACTIVATE) cdk deploy --outputs-file cdk-outputs.json --require-approval broadening -c deployTransferFamily=false
 
 cdk-destroy:
-	cd $(CDK_DIR) && cdk destroy --force
+	cd $(CDK_DIR) && $(ACTIVATE) cdk destroy --force
 
 gen-sources:
 	$(PY) scripts/export_outputs.py --cdk-outputs $(CDK_OUTPUTS) --sources config/sources.yaml --profile northshire-trust
@@ -101,4 +103,4 @@ trust-seed:
 
 trust-destroy:
 	-kill $$(cat .tunnel.pid 2>/dev/null) 2>/dev/null; rm -f .tunnel.pid
-	cd $(CDK_DIR) && cdk destroy --force
+	cd $(CDK_DIR) && $(ACTIVATE) cdk destroy --force

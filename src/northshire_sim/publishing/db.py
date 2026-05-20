@@ -101,14 +101,15 @@ def load_df(
     if df is None or df.empty:
         return 0
 
-    df.to_sql(
-        name=table,
-        con=engine,
-        if_exists=if_exists,
-        index=False,
-        method="multi",
-        chunksize=chunksize,
-    )
+    with engine.begin() as conn:
+        df.to_sql(
+            name=table,
+            con=conn,
+            if_exists=if_exists,
+            index=False,
+            method="multi",
+            chunksize=chunksize,
+        )
     return len(df)
 
 
