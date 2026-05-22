@@ -218,3 +218,5 @@ infra/.cdk.staging/
 
 # SSM tunnel PID (written by aws_trust_up.py)
 .tunnel.pid
+
+config/sources.yaml
