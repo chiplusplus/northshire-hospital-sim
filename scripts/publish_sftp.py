@@ -1,72 +1,102 @@
 #!/usr/bin/env python3
+"""Publish staged SFTP exports to the S3 prefix backing Transfer Family.
+
+AWS Transfer Family maps the SFTP user's logical directory /outbound to
+s3://<bucket>/sftp-incoming/outbound. This script uploads appointment CSVs
+(and optionally other feeds) to that prefix so they're visible when the
+Platform ingestion task connects via SFTP.
+"""
 from __future__ import annotations
 
 import argparse
-import shutil
 from pathlib import Path
 
+import boto3
+import yaml
 
-def ensure_dir(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True)
+
+S3_SFTP_PREFIX = "sftp-incoming/outbound"
 
 
-def copy_files(src_glob: str, dst_dir: Path) -> int:
-    ensure_dir(dst_dir)
+def load_sources(path: Path) -> dict:
+    if not path.exists():
+        raise FileNotFoundError(f"sources.yaml not found: {path}")
+    with path.open("r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def upload_directory(
+    s3,
+    bucket: str,
+    local_glob: str,
+    s3_prefix: str,
+) -> int:
     count = 0
-    for f in sorted(Path(src_glob).parent.glob(Path(src_glob).name)):
-        if f.is_file():
-            shutil.copy2(f, dst_dir / f.name)
-            count += 1
+    parent = Path(local_glob).parent
+    pattern = Path(local_glob).name
+    for f in sorted(parent.glob(pattern)):
+        if not f.is_file():
+            continue
+        key = f"{s3_prefix}/{f.name}"
+        s3.upload_file(str(f), bucket, key)
+        count += 1
     return count
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Publish staged exports to local SFTP drop folder.")
-    p.add_argument("--staging-exports", type=str, default="data/staging/exports", help="Exports staging dir")
-    p.add_argument("--sftp-drop", type=str, default="data/sftp_drop/outbound", help="Local SFTP outbound root")
-    p.add_argument("--include-provider-excel", action="store_true", help="Also publish provider excel to SFTP")
+    p = argparse.ArgumentParser(
+        description="Publish staged exports to the S3 prefix backing Transfer Family SFTP.",
+    )
+    p.add_argument(
+        "--sources", type=str, default="config/sources.yaml",
+        help="Path to sources.yaml (for S3 bucket/region config)",
+    )
+    p.add_argument(
+        "--staging-exports", type=str, default="data/staging/exports",
+        help="Exports staging dir",
+    )
     return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    sources = load_sources(Path(args.sources))
     staging_exports = Path(args.staging_exports)
-    outbound_root = Path(args.sftp_drop)
 
-    appt_src = staging_exports / "appointments" / "*_appointments.csv"
-    gp_src = staging_exports / "gp_registrations" / "*_gp_registrations.csv"
-    esr_src = staging_exports / "esr" / "*_esr_*.csv"
+    s3_cfg = sources.get("s3", {})
+    bucket = s3_cfg["bucket"]
+    region = s3_cfg.get("region", "eu-west-2")
+    profile = s3_cfg.get("profile")
 
-    # Destination folders on the SFTP server
-    appt_dst = outbound_root / "appointments"
-    gp_dst = outbound_root / "gp_registrations"
-    esr_dst = outbound_root / "esr"
+    session = boto3.Session(profile_name=profile, region_name=region)
+    s3 = session.client("s3")
 
-    appt_n = copy_files(str(appt_src), appt_dst)
+    appt_n = upload_directory(
+        s3, bucket,
+        str(staging_exports / "appointments" / "*_appointments.csv"),
+        f"{S3_SFTP_PREFIX}/appointments",
+    )
 
     gp_n = 0
     if (staging_exports / "gp_registrations").exists():
-        gp_n = copy_files(str(gp_src), gp_dst)
+        gp_n = upload_directory(
+            s3, bucket,
+            str(staging_exports / "gp_registrations" / "*_gp_registrations.csv"),
+            f"{S3_SFTP_PREFIX}/gp_registrations",
+        )
 
     esr_n = 0
     if (staging_exports / "esr").exists():
-        esr_n = copy_files(str(esr_src), esr_dst)
+        esr_n = upload_directory(
+            s3, bucket,
+            str(staging_exports / "esr" / "*_esr_*.csv"),
+            f"{S3_SFTP_PREFIX}/esr",
+        )
 
-    provider_n = 0
-    if args.include_provider_excel:
-        provider_src = staging_exports / "providers" / "sites_and_services_master.xlsx"
-        if provider_src.exists():
-            provider_dst = outbound_root / "provider_reference"
-            ensure_dir(provider_dst)
-            shutil.copy2(provider_src, provider_dst / provider_src.name)
-            provider_n = 1
-
-    print("✅ Published to SFTP outbound drop:")
-    print(f"  appointments: {appt_n} files → {appt_dst}")
-    print(f"  gp_registrations: {gp_n} files → {gp_dst}")
-    print(f"  esr: {esr_n} files → {esr_dst}")
-    if args.include_provider_excel:
-        print(f"  provider_excel: {provider_n} file → {outbound_root / 'provider_reference'}")
+    print(f"✅ Published to s3://{bucket}/{S3_SFTP_PREFIX}/:")
+    print(f"  appointments: {appt_n} files")
+    print(f"  gp_registrations: {gp_n} files")
+    print(f"  esr: {esr_n} files")
 
 
 if __name__ == "__main__":

@@ -293,7 +293,7 @@ def main() -> None:
     sftp_deployed = bool(outputs.get("SftpEndpoint"))
     if sftp_deployed and not args.no_sftp:
         run([sys.executable, "scripts/publish_sftp.py",
-             "--staging-exports", f"{staging}/exports"], cwd=REPO_ROOT)
+             "--sources", sources, "--staging-exports", f"{staging}/exports"], cwd=REPO_ROOT)
         ok("SFTP exports published")
 
     # ── Done ───────────────────────────────────────────────────────────────────

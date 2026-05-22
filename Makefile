@@ -57,7 +57,7 @@ publish-urgent:
 	$(PY) scripts/publish_urgent_care.py --sources config/sources.yaml --staging-core data/staging/core
 
 publish-sftp:
-	$(PY) scripts/publish_sftp.py --staging-exports data/staging/exports
+	$(PY) scripts/publish_sftp.py --sources config/sources.yaml --staging-exports data/staging/exports
 
 publish-s3:
 	$(PY) scripts/publish_s3.py --sources config/sources.yaml --staging-exports data/staging/exports --create-buckets-if-missing

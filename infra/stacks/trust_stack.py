@@ -166,7 +166,7 @@ class NorthshireTrustStack(Stack):
             self,
             "SftpUserSecret",
             secret_name="northshire/trust/sftp/trust-sftp",
-            description="SFTP user password for Transfer Family",
+            description="SFTP user credentials for Transfer Family",
             generate_secret_string=secretsmanager.SecretStringGenerator(
                 secret_string_template='{"username": "trust_sftp"}',
                 generate_string_key="password",
@@ -309,6 +309,20 @@ class NorthshireTrustStack(Stack):
             description="Scoped role for northshire-hospital-sim publishing scripts",
         )
         trust_exports_bucket.grant_read_write(publisher_role)
+
+        # Cross-account read access for Platform ECS ingestion tasks
+        if platform_account:
+            trust_exports_bucket.add_to_resource_policy(
+                iam.PolicyStatement(
+                    sid="PlatformCrossAccountRead",
+                    actions=["s3:GetObject", "s3:ListBucket"],
+                    resources=[
+                        trust_exports_bucket.bucket_arn,
+                        f"{trust_exports_bucket.bucket_arn}/*",
+                    ],
+                    principals=[iam.AccountPrincipal(platform_account)],
+                )
+            )
 
         # ── Transfer Family SFTP (optional) ───────────────────────────────────
         sftp_server = None
