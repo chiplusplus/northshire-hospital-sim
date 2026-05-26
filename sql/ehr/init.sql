@@ -71,6 +71,28 @@ CREATE INDEX IF NOT EXISTS idx_enc_type      ON encounters(encounter_type);
 
 
 -- -----------------------
+-- REFERRALS
+-- -----------------------
+CREATE TABLE IF NOT EXISTS referrals (
+    referral_id                BIGINT PRIMARY KEY,
+    patient_id                 BIGINT NOT NULL REFERENCES patient_demographics(patient_id),
+    source_provider_id         BIGINT NOT NULL,
+    target_provider_id         BIGINT NOT NULL,
+    referral_datetime          TIMESTAMP NOT NULL,
+    referral_type              VARCHAR(32),
+    referral_specialty         VARCHAR(64),
+    status                     VARCHAR(16),
+    created_at                 TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at                 TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ref_patient    ON referrals(patient_id);
+CREATE INDEX IF NOT EXISTS idx_ref_source     ON referrals(source_provider_id);
+CREATE INDEX IF NOT EXISTS idx_ref_target     ON referrals(target_provider_id);
+CREATE INDEX IF NOT EXISTS idx_ref_datetime   ON referrals(referral_datetime);
+
+
+-- -----------------------
 -- DIAGNOSES (coded post-event; can lag)
 -- -----------------------
 CREATE TABLE IF NOT EXISTS diagnoses (
