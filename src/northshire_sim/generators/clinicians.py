@@ -8,6 +8,11 @@ import numpy as np
 import pandas as pd
 from datetime import date
 
+from northshire_sim.generators.gm_reference import (
+    GM_CLINICIAN_ETHNICITY_CATEGORIES,
+    GM_CLINICIAN_ETHNICITY_PROBS,
+)
+
 
 def generate_clinicians(providers_df: pd.DataFrame, seed: int) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
@@ -29,8 +34,8 @@ def generate_clinicians(providers_df: pd.DataFrame, seed: int) -> pd.DataFrame:
 
     bands = ["Band 5", "Band 6", "Band 7", "Band 8a", "Consultant", "GP Partner", "ST3"]
 
-    ethnicity_categories = ["White", "Black", "Asian", "Mixed", "Other"]
-    ethnicity_probs = [0.75, 0.07, 0.10, 0.04, 0.04]
+    ethnicity_categories = GM_CLINICIAN_ETHNICITY_CATEGORIES
+    ethnicity_probs = GM_CLINICIAN_ETHNICITY_PROBS
 
     clinician_id = 1
 
