@@ -8,14 +8,27 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
+from northshire_sim.generators.gm_reference import ETHNICITY_GROUPS_WITH_DISPARITY
+
 CONDITION_CODES = ["HTN", "DM2", "ASTHMA", "COPD", "ANXIETY", "DEPRESSION", "SCREENING"]
+
+# Encounter type -> provider type mapping (D-29)
+ENCOUNTER_TO_PROVIDER_TYPE: dict[str, str] = {
+    "GP": "GP_PRACTICE",
+    "OP": "ACUTE_HOSPITAL",
+    "ED": "URGENT_CARE",
+    "IP": "ACUTE_HOSPITAL",
+    "COMMUNITY": "COMMUNITY_CLINIC",
+    "DIAGNOSTIC": "DIAGNOSTIC_CENTRE",
+}
 
 
 def expected_annual_rate(row) -> float:
     base_rate_by_age = {
-        "0-17": 1.2,
-        "18-39": 1.5,
-        "40-64": 2.5,
+        "0-15": 2.0,
+        "16-24": 1.5,
+        "25-44": 2.0,
+        "45-64": 2.5,
         "65-79": 4.0,
         "80+": 6.0,
     }
@@ -41,7 +54,7 @@ def encounter_type_probs(row) -> dict:
         base["OP"] += 0.05
         base["DIAGNOSTIC"] += 0.05
         base["GP"] -= 0.05
-    if row["age_band"] in ["0-17", "18-39"]:
+    if row["age_band"] in ["0-15", "16-24"]:
         base["IP"] -= 0.02
         base["ED"] += 0.02
 
@@ -58,7 +71,7 @@ def sample_wait_time_days(enc_type: str, imd_decile: int, ethnicity_ons, rng: np
         base = int(rng.integers(7, 61))
         if imd_decile <= 3:
             base += int(rng.integers(5, 21))
-        if ethnicity_ons in ["Black", "Asian", "Mixed"]:
+        if ethnicity_ons in ETHNICITY_GROUPS_WITH_DISPARITY:
             base += int(rng.integers(0, 11))
     return max(base, 0)
 
@@ -74,7 +87,14 @@ def generate_encounters(
     rng = np.random.default_rng(seed)
     encounters = []
 
-    provider_ids = providers_df["provider_id"].tolist()
+    # Build provider type -> provider_id mapping for type-matched assignment (D-29)
+    all_provider_ids = providers_df["provider_id"].tolist()
+    provider_ids_by_type: dict[str, list[int]] = {}
+    for ptype in providers_df["provider_type"].unique():
+        provider_ids_by_type[ptype] = providers_df.loc[
+            providers_df["provider_type"] == ptype, "provider_id"
+        ].tolist()
+
     clinician_ids = clinicians_df["clinician_id"].tolist()
 
     for _, p in patients_df.iterrows():
@@ -113,7 +133,9 @@ def generate_encounters(
             enc_type = enc_types[i]
             wait_days = sample_wait_time_days(enc_type, p["imd_decile"], p["ethnicity_ons"], rng)
 
-            site_id = rng.choice(provider_ids)
+            target_ptype = ENCOUNTER_TO_PROVIDER_TYPE.get(enc_type, "GP_PRACTICE")
+            type_providers = provider_ids_by_type.get(target_ptype, all_provider_ids)
+            site_id = rng.choice(type_providers)
             clinician_id = rng.choice(clinician_ids) if len(clinician_ids) > 0 else None
 
             if enc_type in ["ED", "IP"]:

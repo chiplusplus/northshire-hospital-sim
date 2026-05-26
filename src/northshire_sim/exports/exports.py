@@ -275,6 +275,7 @@ def build_provider_reference_df(providers_df: pd.DataFrame, seed: int) -> pd.Dat
 
     # Reorder to look like a human-curated sheet
     columns_order = [
+        "provider_id",
         "provider_code",
         "site_name",
         "provider_type",

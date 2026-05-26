@@ -48,7 +48,7 @@ def generate_referrals(
     targetable = providers[providers["provider_type"].isin(["ACUTE_HOSPITAL", "COMMUNITY_CLINIC", "DIAGNOSTIC_CENTRE"])]
 
     # Choose a subset of encounters to generate referrals from (unchanged logic)
-    sampled = encounters_df.sample(frac=0.35, replace=False, random_state=42)
+    sampled = encounters_df.sample(frac=0.35, replace=False, random_state=seed)
     n = len(sampled)
 
     if n == 0:
