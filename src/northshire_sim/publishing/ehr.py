@@ -10,7 +10,7 @@ from northshire_sim.publishing.db import make_engine, run_sql_file, truncate_tab
 EHR_TABLES_IN_LOAD_ORDER = (
     "patient_demographics",
     "encounters",
-    # TODO: still needed?
+    "referrals",
     "diagnoses",
     "procedures",
 )
@@ -76,7 +76,16 @@ def publish_ehr_internal(cfg: EhrPublishConfig) -> None:
         )
         print(f"   - encounters: loaded {n_enc:,} rows")
 
-        # Optional: diagnoses/procedures if you generate them later
+        referrals_csv = cfg.staging_core_dir / "referrals.csv"
+        if referrals_csv.exists():
+            n_ref = load_csv(
+                engine, referrals_csv, "referrals",
+                if_exists="append", chunksize=cfg.csv_chunksize,
+            )
+            print(f"   - referrals: loaded {n_ref:,} rows")
+        else:
+            print("   - referrals: no staging file found (skipping)")
+
         diagnoses_csv = cfg.staging_core_dir / "diagnoses.csv"
         if diagnoses_csv.exists():
             n_diag = load_csv(engine, diagnoses_csv, "diagnoses", if_exists="append", chunksize=cfg.csv_chunksize)

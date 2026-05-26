@@ -14,6 +14,7 @@ from northshire_sim.publishing.db import FullRefreshConfig, full_refresh_mirror
 DEFAULT_EHR_TABLES: Sequence[str] = (
     "patient_demographics",
     "encounters",
+    "referrals",
     "diagnoses",
     "procedures",
 )
