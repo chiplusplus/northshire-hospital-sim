@@ -1,123 +1,185 @@
 """
 Patient generator.
 
+SYNTHETIC DATA — NOT REAL PATIENTS.
+
 Creates a synthetic patient population with demographics, deprivation, geography,
-and GP registration fields. Returns a pandas DataFrame (no IO).
+and GP registration fields modelled on Greater Manchester. Returns a pandas
+DataFrame (no IO).
+
+NHS numbers use the Mod-11 check-digit algorithm per NHS Data Dictionary.
+~95% are valid; ~5% are intentionally invalid for quarantine testing.
 """
+
+from __future__ import annotations
+
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
+
+from northshire_sim.generators.gm_reference import (
+    AGE_BAND_LABELS,
+    AGE_BAND_PROBS,
+    AGE_BAND_RANGES,
+    GM_ETHNICITY_CATEGORIES,
+    GM_ETHNICITY_PROBS,
+    GM_GP_PRACTICES,
+    GM_LSOA_IMD_LOOKUP,
+)
+
+
+# ---------------------------------------------------------------------------
+# NHS Mod-11 number generation (D-01, D-03, D-04)
+# ---------------------------------------------------------------------------
+
+_MOD11_WEIGHTS = [10, 9, 8, 7, 6, 5, 4, 3, 2]
+
+
+def _generate_nhs_number(rng: np.random.Generator) -> str:
+    """Generate a valid NHS Mod-11 check-digit number (10 digits)."""
+    while True:
+        digits = [int(d) for d in rng.integers(0, 10, size=9)]
+        remainder = sum(d * w for d, w in zip(digits, _MOD11_WEIGHTS)) % 11
+        check = 11 - remainder
+        if check == 11:
+            check = 0
+        if check == 10:
+            continue  # invalid combination — regenerate
+        digits.append(check)
+        return "".join(str(d) for d in digits)
+
+
+def _invalidate_nhs_number(nhs_number: str, rng: np.random.Generator) -> str:
+    """Flip one digit to break checksum while keeping 10-digit format."""
+    digits = list(nhs_number)
+    pos = int(rng.integers(0, 9))  # flip a non-check digit
+    original = int(digits[pos])
+    replacement = (original + int(rng.integers(1, 10))) % 10
+    digits[pos] = str(replacement)
+    return "".join(digits)
+
+
+# ---------------------------------------------------------------------------
+# Main generator
+# ---------------------------------------------------------------------------
 
 
 def generate_patients(n_patients: int, seed: int) -> pd.DataFrame:
     """
     Generate a synthetic patient dimension-style dataset.
+
+    Uses np.random.default_rng(seed) for reproducible, modern seeding (D-18).
     """
-    np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     analysis_date = datetime(2025, 1, 1)
 
-    # 1. Age bands
-    age_band_labels = ["16-24", "25-44", "45-64", "65-79", "80+"]
-    age_band_probs = [0.12, 0.35, 0.30, 0.18, 0.05]
-    age_band = np.random.choice(age_band_labels, size=n_patients, p=age_band_probs)
+    # ----- 1. Age bands (D-21) — includes 0-15 paediatric -----
+    age_band = rng.choice(AGE_BAND_LABELS, size=n_patients, p=AGE_BAND_PROBS)
 
-    def sample_age(band: str) -> int:
-        ranges = {
-            "16-24": (16, 24),
-            "25-44": (25, 44),
-            "45-64": (45, 64),
-            "65-79": (65, 79),
-            "80+": (80, 95),
-        }
-        lo, hi = ranges[band]
-        return np.random.randint(lo, hi + 1)
+    def _sample_age(band: str) -> int:
+        lo, hi = AGE_BAND_RANGES[band]
+        return int(rng.integers(lo, hi + 1))
 
-    age = np.array([sample_age(b) for b in age_band])
+    age = np.array([_sample_age(b) for b in age_band])
 
-    # 2. Sex
+    # ----- 2. Sex (D-22) — unchanged -----
     sex_choices = ["F", "M", "Other/Unknown"]
     sex_probs = [0.51, 0.48, 0.01]
-    sex = np.random.choice(sex_choices, size=n_patients, p=sex_probs)
+    sex = rng.choice(sex_choices, size=n_patients, p=sex_probs)
 
-    # 3. Ethnicity
-    eth_choices = ["White", "Asian", "Black", "Mixed", "Other", None]
-    eth_probs = [0.8, 0.065, 0.02, 0.01, 0.005, 0.1]
-    ethnicity = np.random.choice(eth_choices, size=n_patients, p=eth_probs)
+    # ----- 3. Ethnicity — ONS 2021 Census GM (D-20) -----
+    ethnicity = rng.choice(GM_ETHNICITY_CATEGORIES, size=n_patients, p=GM_ETHNICITY_PROBS)
 
-    # 4. IMD decile (1 = most deprived)
-    imd_deciles = np.arange(1, 11)
-    imd_probs = [0.18, 0.18, 0.15, 0.10, 0.08, 0.08, 0.07, 0.06, 0.05, 0.05]
-    imd_decile = np.random.choice(imd_deciles, size=n_patients, p=imd_probs)
+    # ----- 4. Geography — LSOA-derived IMD & postcode (D-05, D-07) -----
+    # Weight by inverse decile: decile 1 (most deprived) gets more patients
+    lsoa_weights = np.array(
+        [1.0 / e["imd_decile"] for e in GM_LSOA_IMD_LOOKUP], dtype=float
+    )
+    lsoa_weights /= lsoa_weights.sum()
+    lsoa_indices = rng.choice(len(GM_LSOA_IMD_LOOKUP), size=n_patients, p=lsoa_weights)
+    lsoa_entries = [GM_LSOA_IMD_LOOKUP[i] for i in lsoa_indices]
 
-    # Example correlation: more chronic conditions if older & more deprived
-    def sample_chronic_conditions(age_val: int, imd: int) -> int:
+    lsoa_code = [e["lsoa_code"] for e in lsoa_entries]
+    imd_decile = np.array([e["imd_decile"] for e in lsoa_entries])
+    postcode_sector = [e["postcode_sector"] for e in lsoa_entries]
+
+    # ----- 5. Chronic conditions (D-23) — age + IMD correlation -----
+    def _sample_chronic_conditions(age_val: int, imd: int) -> int:
         base = 0
         if age_val >= 65:
             base += 1
         if imd <= 3:
             base += 1
-        lam = 0.5 + 0.3 * base  # Poisson lambda
-        return np.random.poisson(lam)
+        lam = 0.5 + 0.3 * base
+        return int(rng.poisson(lam))
 
     chronic_conditions_count = np.array(
-        [sample_chronic_conditions(a, d) for a, d in zip(age, imd_decile)]
+        [_sample_chronic_conditions(a, d) for a, d in zip(age, imd_decile)]
     )
 
-    # 5. Dates
-    def random_dob(age_val: int) -> datetime:
-        years_delta = age_val
-        # Random offset within +/- 6 months
-        days_offset = np.random.randint(-183, 184)
-        return (analysis_date - timedelta(days=365 * int(years_delta))) + timedelta(
+    # ----- 6. Dates -----
+    def _random_dob(age_val: int) -> datetime:
+        days_offset = int(rng.integers(-183, 184))
+        return (analysis_date - timedelta(days=365 * int(age_val))) + timedelta(
             days=days_offset
         )
 
-    date_of_birth = np.array([random_dob(a).date() for a in age])
+    date_of_birth = np.array([_random_dob(a).date() for a in age])
 
-    def registration_start(dob):
-        min_start = dob.replace(year=dob.year + 16)
+    def _registration_start(dob, age_val: int):
+        """Registration start date. Children (0-15) registered at birth."""
+        if age_val <= 15:
+            # Paediatric: registered at birth
+            min_start = dob
+        else:
+            min_start = dob.replace(year=dob.year + 16)
         max_start = (analysis_date - timedelta(days=30)).date()
         if min_start > max_start:
             min_start = max_start - timedelta(days=365)
         delta_days = (max_start - min_start).days
         if delta_days <= 0:
             return min_start
-        return min_start + timedelta(days=np.random.randint(0, delta_days + 1))
+        return min_start + timedelta(days=int(rng.integers(0, delta_days + 1)))
 
-    registration_start_date = np.array([registration_start(dob) for dob in date_of_birth])
+    registration_start_date = np.array(
+        [_registration_start(dob, a) for dob, a in zip(date_of_birth, age)]
+    )
 
-    is_active = np.random.choice([True, False], size=n_patients, p=[0.9, 0.1])
+    is_active = rng.choice([True, False], size=n_patients, p=[0.9, 0.1])
 
-    def registration_end(start, active):
+    def _registration_end(start, active):
         if active:
             return None
         max_end = (analysis_date - timedelta(days=1)).date()
         delta = (max_end - start).days
         if delta <= 0:
             return max_end
-        return start + timedelta(days=np.random.randint(1, delta + 1))
+        return start + timedelta(days=int(rng.integers(1, delta + 1)))
 
     registration_end_date = np.array(
-        [registration_end(start, active) for start, active in zip(registration_start_date, is_active)]
+        [_registration_end(s, a) for s, a in zip(registration_start_date, is_active)]
     )
 
-    # 6. Synthetic GP practices & geography
-    gp_practices = [f"GP_{i:03d}" for i in range(1, 101)]
-    registered_gp_practice_id = np.random.choice(gp_practices, size=n_patients)
+    # ----- 7. GP practices — P-prefixed ODS-style codes (D-08) -----
+    practice_ids = [p["practice_id"] for p in GM_GP_PRACTICES]
+    registered_gp_practice_id = rng.choice(practice_ids, size=n_patients)
 
-    lsoa_codes = [f"E010{str(i).zfill(6)}" for i in range(1, 501)]
-    postcode_sectors = ["SE15 4", "SE5 0", "E2 8", "N1 2", "SW9 7", "B10 9"]
+    # ----- 8. NHS numbers — Mod-11 with ~5% intentional invalids (D-01, D-03) -----
+    n_valid = int(n_patients * 0.95)
+    nhs_numbers: list[str] = []
+    for i in range(n_patients):
+        nhs_num = _generate_nhs_number(rng)
+        if i >= n_valid:
+            nhs_num = _invalidate_nhs_number(nhs_num, rng)
+        nhs_numbers.append(nhs_num)
 
-    lsoa_code = np.random.choice(lsoa_codes, size=n_patients)
-    postcode_sector = np.random.choice(postcode_sectors, size=n_patients)
-
-    # 7. Assemble DataFrame
+    # ----- 9. Assemble DataFrame -----
     df_patients = pd.DataFrame(
         {
             "patient_id": np.arange(1, n_patients + 1),
-            "nhs_pseudo_id": [f"PSEUDO_{i:06d}" for i in range(1, n_patients + 1)],
+            "nhs_pseudo_id": nhs_numbers,
             "date_of_birth": date_of_birth,
             "age": age,
             "age_band": age_band,
