@@ -169,10 +169,14 @@ def generate_patients(n_patients: int, seed: int) -> pd.DataFrame:
     # ----- 8. NHS numbers — Mod-11 with ~5% intentional invalids (D-01, D-03) -----
     n_valid = int(n_patients * 0.95)
     nhs_numbers: list[str] = []
+    seen: set[str] = set()
     for i in range(n_patients):
         nhs_num = _generate_nhs_number(rng)
+        while nhs_num in seen:
+            nhs_num = _generate_nhs_number(rng)
         if i >= n_valid:
             nhs_num = _invalidate_nhs_number(nhs_num, rng)
+        seen.add(nhs_num)
         nhs_numbers.append(nhs_num)
 
     # ----- 9. Assemble DataFrame -----
