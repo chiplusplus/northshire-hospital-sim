@@ -31,6 +31,7 @@ from northshire_sim.generators.providers import generate_providers
 from northshire_sim.generators.clinicians import generate_clinicians
 from northshire_sim.generators.encounters import generate_encounters
 from northshire_sim.generators.referrals import generate_referrals
+from northshire_sim.generators.diagnoses import generate_diagnoses
 from northshire_sim.generators.diagnostics import generate_diagnostics
 from northshire_sim.generators.urgent_care import generate_urgent_care_logs
 
@@ -127,6 +128,11 @@ def generate_core(cfg: GenerationConfig) -> Dict[str, pd.DataFrame]:
 
     referrals = generate_referrals(encounters_df=encounters, providers_df=providers, seed=cfg.seed)
 
+    diagnoses = generate_diagnoses(
+        encounters_df=encounters,
+        seed=cfg.seed,
+    )
+
     diagnostics = generate_diagnostics(
         referrals_df=referrals,
         patients_df=patients,
@@ -147,6 +153,7 @@ def generate_core(cfg: GenerationConfig) -> Dict[str, pd.DataFrame]:
         "clinicians": clinicians,
         "encounters": encounters,
         "referrals": referrals,
+        "diagnoses": diagnoses,
         "diagnostics": diagnostics,
         "urgent_care": urgent_care,
     }
@@ -197,6 +204,7 @@ def write_staging(dfs: Dict[str, pd.DataFrame], artifacts: List[ExportArtifact],
     write_csv(dfs["clinicians"], core_dir / "clinicians.csv")
     write_csv(dfs["encounters"], core_dir / "encounters.csv")
     write_csv(dfs["referrals"], core_dir / "referrals.csv")
+    write_csv(dfs["diagnoses"], core_dir / "diagnoses.csv")
     write_csv(dfs["diagnostics"], core_dir / "diagnostics.csv")
     write_csv(dfs["urgent_care"], core_dir / "urgent_care_logs.csv")
 

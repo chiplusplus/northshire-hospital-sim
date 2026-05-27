@@ -255,6 +255,33 @@ def validate_referrals(referrals: pd.DataFrame, patients: pd.DataFrame, provider
     assert_fk(referrals["target_provider_id"], providers["provider_id"], "referrals.target_provider_id -> providers.provider_id")
 
 
+def validate_diagnoses(
+    diagnoses: pd.DataFrame,
+    patients: pd.DataFrame,
+    encounters: pd.DataFrame,
+) -> None:
+    required = [
+        "diagnosis_id",
+        "patient_id",
+        "encounter_id",
+        "diagnosis_code",
+        "diagnosis_desc",
+        "diagnosis_type",
+        "coded_datetime",
+        "clinical_datetime",
+        "source_system",
+    ]
+    assert_required_columns(diagnoses, required, "diagnoses")
+    assert_unique_key(diagnoses, "diagnosis_id", "diagnoses", allow_empty=True)
+
+    if diagnoses.empty:
+        return
+
+    assert_fk(diagnoses["patient_id"], patients["patient_id"], "diagnoses.patient_id -> patients.patient_id")
+    assert_fk(diagnoses["encounter_id"], encounters["encounter_id"], "diagnoses.encounter_id -> encounters.encounter_id")
+    assert_datetime_order(diagnoses, "clinical_datetime", "coded_datetime", "diagnoses", allow_equal=True, allow_null_end=False)
+
+
 def validate_diagnostics(
     diagnostics: pd.DataFrame,
     patients: pd.DataFrame,
@@ -355,9 +382,9 @@ def validate_dataset(dfs: Dict[str, pd.DataFrame]) -> None:
     """
     Validate the full generated dataset (core tables).
     Expects the following keys in dfs:
-    - patients, providers, clinicians, encounters, referrals, diagnostics, urgent_care
+    - patients, providers, clinicians, encounters, referrals, diagnoses, diagnostics, urgent_care
     """
-    required_keys = ["patients", "providers", "clinicians", "encounters", "referrals", "diagnostics", "urgent_care"]
+    required_keys = ["patients", "providers", "clinicians", "encounters", "referrals", "diagnoses", "diagnostics", "urgent_care"]
     missing = [k for k in required_keys if k not in dfs]
     if missing:
         raise AssertionError(f"[validate_dataset] Missing DataFrames in dict: {missing}")
@@ -367,6 +394,7 @@ def validate_dataset(dfs: Dict[str, pd.DataFrame]) -> None:
     clinicians = dfs["clinicians"]
     encounters = dfs["encounters"]
     referrals = dfs["referrals"]
+    diagnoses = dfs["diagnoses"]
     diagnostics = dfs["diagnostics"]
     urgent_care = dfs["urgent_care"]
 
@@ -375,5 +403,6 @@ def validate_dataset(dfs: Dict[str, pd.DataFrame]) -> None:
     validate_clinicians(clinicians, providers)
     validate_encounters(encounters, patients, providers, clinicians)
     validate_referrals(referrals, patients, providers)
+    validate_diagnoses(diagnoses, patients, encounters)
     validate_diagnostics(diagnostics, patients, providers, encounters, referrals=referrals)
     validate_urgent_care(urgent_care, encounters, patients, providers, clinicians)
