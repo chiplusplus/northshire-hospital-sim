@@ -150,7 +150,7 @@ def psql(admin_pass: str, db: str, *, sql: str | None = None, file: Path | None 
     elif file:
         cmd += ["-f", str(file)]
     # Admin password goes via env var — safe regardless of special characters
-    subprocess.run(cmd, env={**os.environ, "PGPASSWORD": admin_pass}, check=True, cwd=REPO_ROOT)
+    subprocess.run(cmd, env={**os.environ, "PGPASSWORD": admin_pass, "PGSSLMODE": "require"}, check=True, cwd=REPO_ROOT)
 
 
 def db_exists(admin_pass: str, dbname: str) -> bool:
@@ -165,7 +165,7 @@ def db_exists(admin_pass: str, dbname: str) -> bool:
             "-U", "trust_admin", "-d", "ehr",
             "-tAc", f"SELECT 1 FROM pg_database WHERE datname = '{dbname}'",
         ],
-        env={**os.environ, "PGPASSWORD": admin_pass},
+        env={**os.environ, "PGPASSWORD": admin_pass, "PGSSLMODE": "require"},
         capture_output=True,
         text=True,
     )
