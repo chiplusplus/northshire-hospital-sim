@@ -223,7 +223,7 @@ def main() -> None:
     if not args.skip_deploy:
         step("Deploying CDK stack")
         deploy_cmd = [
-            "cdk", "deploy",
+            "cdk", "deploy", "--all",
             "--outputs-file", "cdk-outputs.json",
             "--require-approval", "never",
         ]

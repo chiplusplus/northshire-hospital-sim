@@ -27,7 +27,7 @@ def load_outputs(cdk_outputs_path: Path) -> dict:
     if not cdk_outputs_path.exists():
         sys.exit(
             f"ERROR: {cdk_outputs_path} not found.\n"
-            "Run:  cd infra && cdk deploy --outputs-file cdk-outputs.json"
+            "Run:  cd infra && cdk deploy --all --outputs-file cdk-outputs.json"
         )
     with cdk_outputs_path.open() as f:
         all_outputs = json.load(f)
