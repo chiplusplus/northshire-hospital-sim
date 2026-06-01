@@ -5,10 +5,14 @@ from aws_cdk import (
     Tags,
     CfnOutput,
     RemovalPolicy,
+    Duration,
     aws_ec2 as ec2,
     aws_rds as rds,
     aws_s3 as s3,
     aws_iam as iam,
+    aws_lambda as _lambda,
+    aws_events as events,
+    aws_events_targets as targets,
     aws_secretsmanager as secretsmanager,
     aws_transfer as transfer,
 )
@@ -440,6 +444,61 @@ class NorthshireTrustStack(Stack):
                 export_name="NorthshireTrust-PeeringAccepterRoleArn",
                 description="IAM role ARN for Platform cross-account peering automation",
             )
+
+        # ── S3 Gateway Endpoint (Lambda in PRIVATE_ISOLATED needs this) ──────
+        vpc.add_gateway_endpoint(
+            "S3Endpoint",
+            service=ec2.GatewayVpcEndpointAwsService.S3,
+            subnets=[
+                ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED)
+            ],
+        )
+
+        # ── Simulation Lambda ─────────────────────────────────────────────────
+        simulate_fn = _lambda.Function(
+            self,
+            "SimulateDailyDrop",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="handler.handler",
+            code=_lambda.Code.from_asset("lambda/simulate_daily_drop"),
+            timeout=Duration.minutes(5),
+            memory_size=256,
+            environment={
+                "TRUST_BUCKET": trust_exports_bucket.bucket_name,
+                "SFTP_PREFIX": "sftp-incoming/outbound/appointments",
+                "DIAGNOSTICS_PREFIX": "diagnostics",
+                "RDS_DSN": "",
+            },
+            vpc=vpc,
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
+            ),
+            security_groups=[rds_sg],
+        )
+
+        trust_exports_bucket.grant_read_write(simulate_fn)
+
+        # EventBridge rule — deployed DISABLED, enabled by session.sh after
+        # Platform is ready
+        simulation_rule = events.Rule(
+            self,
+            "SimulationSchedule",
+            schedule=events.Schedule.rate(Duration.minutes(30)),
+            enabled=False,
+        )
+        simulation_rule.add_target(targets.LambdaFunction(simulate_fn))
+
+        # Outputs for session.sh
+        CfnOutput(self, "SimulationRuleName",
+            value=simulation_rule.rule_name,
+            export_name="NorthshireTrust-SimulationRuleName",
+            description="EventBridge rule name for simulation schedule",
+        )
+        CfnOutput(self, "SimulationLambdaName",
+            value=simulate_fn.function_name,
+            export_name="NorthshireTrust-SimulationLambdaName",
+            description="Simulation Lambda function name",
+        )
 
         # ── Outputs ───────────────────────────────────────────────────────────
         CfnOutput(self, "VpcId",
