@@ -467,7 +467,9 @@ class NorthshireTrustStack(Stack):
                 "TRUST_BUCKET": trust_exports_bucket.bucket_name,
                 "SFTP_PREFIX": "sftp-incoming/outbound/appointments",
                 "DIAGNOSTICS_PREFIX": "diagnostics",
-                "RDS_DSN": "",
+                "RDS_HOST": db_instance.db_instance_endpoint_address,
+                "RDS_PORT": db_instance.db_instance_endpoint_port,
+                "RDS_SECRET_ARN": db_instance.secret.secret_arn,
             },
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(
@@ -477,6 +479,7 @@ class NorthshireTrustStack(Stack):
         )
 
         trust_exports_bucket.grant_read_write(simulate_fn)
+        db_instance.secret.grant_read(simulate_fn)
 
         # EventBridge rule — deployed DISABLED, enabled by session.sh after
         # Platform is ready

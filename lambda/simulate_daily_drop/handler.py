@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import logging
 import os
 import re
@@ -21,13 +22,39 @@ logger.setLevel(logging.INFO)
 
 DAY_PATTERN = re.compile(r"day=(\d{4}-\d{2}-\d{2})/")
 
+_cached_dsn: str | None = None
+
+
+def _resolve_rds_dsn() -> str:
+    """Build a DSN from RDS_HOST/RDS_PORT env vars + admin credentials from Secrets Manager."""
+    global _cached_dsn
+    if _cached_dsn:
+        return _cached_dsn
+
+    host = os.environ.get("RDS_HOST", "")
+    port = os.environ.get("RDS_PORT", "5432")
+    secret_arn = os.environ.get("RDS_SECRET_ARN", "")
+
+    if not host or not secret_arn:
+        return ""
+
+    sm = boto3.client("secretsmanager")
+    resp = sm.get_secret_value(SecretId=secret_arn)
+    secret = json.loads(resp["SecretString"])
+
+    _cached_dsn = (
+        f"postgresql://{secret['username']}:{secret['password']}"
+        f"@{host}:{port}/{secret.get('dbname', 'ehr')}"
+    )
+    return _cached_dsn
+
 
 def handler(event: dict, context: Any) -> dict:
     trust_bucket = event.get("trust_bucket") or os.environ["TRUST_BUCKET"]
     queue_prefix = event.get("queue_prefix", "_simulation_queue")
     sftp_prefix = event.get("sftp_prefix") or os.environ.get("SFTP_PREFIX", "sftp-incoming/outbound/appointments")
     diagnostics_prefix = event.get("diagnostics_prefix") or os.environ.get("DIAGNOSTICS_PREFIX", "diagnostics")
-    rds_dsn = event.get("rds_dsn") or os.environ.get("RDS_DSN", "")
+    rds_dsn = event.get("rds_dsn") or _resolve_rds_dsn()
 
     s3 = _s3_client()
 
@@ -87,10 +114,6 @@ def _s3_client():
     return boto3.client("s3")
 
 
-def _rds_connection(dsn: str):
-    return psycopg2.connect(dsn)
-
-
 def _publish_appointments(s3, bucket: str, source_key: str, sftp_prefix: str, date_nodash: str) -> None:
     dest_key = f"{sftp_prefix}/{date_nodash}_appointments.csv"
     s3.copy_object(
@@ -113,7 +136,7 @@ def _publish_diagnostics(s3, bucket: str, source_key: str, diagnostics_prefix: s
 
 def _publish_to_rds(s3, bucket: str, source_key: str, rds_dsn: str, db_name: str) -> None:
     if not rds_dsn:
-        logger.warning("No RDS_DSN configured — skipping %s insert", db_name)
+        logger.warning("No RDS DSN available — skipping %s insert", db_name)
         return
 
     resp = s3.get_object(Bucket=bucket, Key=source_key)
@@ -124,7 +147,7 @@ def _publish_to_rds(s3, bucket: str, source_key: str, rds_dsn: str, db_name: str
     if not rows:
         return
 
-    conn = _rds_connection(rds_dsn)
+    conn = psycopg2.connect(rds_dsn)
     try:
         cursor = conn.cursor()
         table = source_key.split("/")[-1].replace(".csv", "")
