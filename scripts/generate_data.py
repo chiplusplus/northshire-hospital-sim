@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
 
@@ -113,7 +113,11 @@ def summarise(name: str, df: pd.DataFrame) -> None:
 # -------------------------
 
 def generate_core(cfg: GenerationConfig) -> Dict[str, pd.DataFrame]:
-    patients = generate_patients(cfg.n_patients, seed=cfg.seed)
+    patients = generate_patients(
+        cfg.n_patients,
+        seed=cfg.seed,
+        analysis_date=datetime.combine(cfg.end_date, datetime.min.time()),
+    )
     providers = generate_providers(cfg.n_providers, seed=cfg.seed)
     clinicians = generate_clinicians(providers_df=providers, seed=cfg.seed)
 

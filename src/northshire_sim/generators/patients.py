@@ -65,7 +65,7 @@ def _invalidate_nhs_number(nhs_number: str, rng: np.random.Generator) -> str:
 # ---------------------------------------------------------------------------
 
 
-def generate_patients(n_patients: int, seed: int) -> pd.DataFrame:
+def generate_patients(n_patients: int, seed: int, analysis_date: datetime | None = None) -> pd.DataFrame:
     """
     Generate a synthetic patient dimension-style dataset.
 
@@ -73,7 +73,8 @@ def generate_patients(n_patients: int, seed: int) -> pd.DataFrame:
     """
     rng = np.random.default_rng(seed)
 
-    analysis_date = datetime(2025, 1, 1)
+    if analysis_date is None:
+        analysis_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
     # ----- 1. Age bands (D-21) — includes 0-15 paediatric -----
     age_band = rng.choice(AGE_BAND_LABELS, size=n_patients, p=AGE_BAND_PROBS)
