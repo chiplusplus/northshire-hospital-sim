@@ -22,6 +22,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--skip-urgent", action="store_true", help="Skip urgent care internal + mirror publish")
     p.add_argument("--skip-sftp", action="store_true", help="Skip SFTP publish")
     p.add_argument("--skip-s3", action="store_true", help="Skip S3 publish")
+    p.add_argument("--skip-sim-queue", action="store_true", help="Skip simulation queue publish")
     p.add_argument("--create-buckets-if-missing", action="store_true", help="Best-effort bucket create (sim only)")
     return p.parse_args()
 
@@ -96,6 +97,19 @@ def main() -> None:
         if args.create_buckets_if_missing:
             cmd.append("--create-buckets-if-missing")
         run(cmd)
+
+    # 6) Publish simulation queue CSVs to S3
+    if not args.skip_sim_queue:
+        run(
+            [
+                sys.executable,
+                "scripts/publish_simulation_queue.py",
+                "--sources",
+                sources,
+                "--staging-dir",
+                str(Path(args.staging_dir) / "simulation_queue"),
+            ]
+        )
 
     print("\n✅ Trust simulator bootstrap complete.")
 

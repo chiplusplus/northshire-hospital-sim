@@ -1,4 +1,4 @@
-.PHONY: help up down logs trust trust-fast generate publish-ehr publish-urgent publish-sftp publish-s3 reset reset-soft cdk-synth cdk-deploy cdk-deploy-no-sftp cdk-destroy gen-sources trust-bootstrap trust-bootstrap-no-sftp trust-seed trust-destroy
+.PHONY: help up down logs trust trust-fast generate publish-ehr publish-urgent publish-sftp publish-s3 publish-sim-queue reset reset-soft cdk-synth cdk-deploy cdk-deploy-no-sftp cdk-destroy gen-sources trust-bootstrap trust-bootstrap-no-sftp trust-seed trust-destroy
 
 VENV=.northshire-hospital-sim
 PY=$(VENV)/bin/python
@@ -17,6 +17,7 @@ help:
 	@echo "  publish-urgent - Load urgent_internal + refresh urgent_mirror"
 	@echo "  publish-sftp   - Publish staged exports to SFTP drop"
 	@echo "  publish-s3     - Upload diagnostics + providers excel to S3"
+	@echo "  publish-sim-queue - Upload simulation queue CSVs to S3"
 	@echo "  trust          - Full bootstrap (up + generate + publish all)"
 	@echo "  trust-fast     - Bootstrap without docker up (assumes services already running)"
 	@echo "  reset          - Full reset: stop containers, remove volumes, delete all generated artefacts"
@@ -61,6 +62,9 @@ publish-sftp:
 
 publish-s3:
 	$(PY) scripts/publish_s3.py --sources config/sources.yaml --staging-exports data/staging/exports --create-buckets-if-missing
+
+publish-sim-queue:
+	$(PY) scripts/publish_simulation_queue.py
 
 trust:
 	$(PY) scripts/trust.py --start-services --create-buckets-if-missing $(ARGS)
