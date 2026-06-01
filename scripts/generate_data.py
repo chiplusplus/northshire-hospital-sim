@@ -17,6 +17,8 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+
+from dateutil.relativedelta import relativedelta
 from pathlib import Path
 from typing import Dict, List
 
@@ -62,14 +64,25 @@ class GenerationConfig:
     diagnostics_export_days: int
 
 
+HOLDBACK_DAYS = 12
+
+
+def _default_start() -> date:
+    return date.today() - relativedelta(months=12)
+
+
+def _default_end() -> date:
+    return date.today() + timedelta(days=HOLDBACK_DAYS)
+
+
 DEFAULTS = GenerationConfig(
     seed=42,
     n_patients=100_000,
     n_providers=125,
-    start_date=date(2023, 1, 1),
-    end_date=date(2024, 12, 31),
-    appointment_export_days=14,
-    diagnostics_export_days=14,
+    start_date=_default_start(),
+    end_date=_default_end(),
+    appointment_export_days=((_default_end() - _default_start()).days + 1),
+    diagnostics_export_days=((_default_end() - _default_start()).days + 1),
 )
 
 
