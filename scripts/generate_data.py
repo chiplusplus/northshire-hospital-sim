@@ -47,6 +47,7 @@ from northshire_sim.exports.exports import (
     build_diagnostic_orders_exports,
     build_provider_reference_excel_artifact,
 )
+from northshire_sim.exports.simulation_queue import build_simulation_queue
 
 
 # -------------------------
@@ -181,10 +182,10 @@ def generate_core(cfg: GenerationConfig) -> Dict[str, pd.DataFrame]:
 
 
 def build_exports(cfg: GenerationConfig, dfs: Dict[str, pd.DataFrame]) -> List[ExportArtifact]:
-    # Appointment nightly exports: last N days of the encounter window
-    appt_end = cfg.end_date
-    appt_start = appt_end - timedelta(days=cfg.appointment_export_days - 1)
-    export_dates = [appt_start + timedelta(days=i) for i in range(cfg.appointment_export_days)]
+    # Immediate-only: export dates up to today (holdback days handled by simulation queue)
+    cutoff = min(cfg.end_date, date.today())
+    n_immediate_days = (cutoff - cfg.start_date).days + 1
+    export_dates = [cfg.start_date + timedelta(days=i) for i in range(n_immediate_days)]
 
     appointment_artifacts = build_appointment_exports(
         encounters_df=dfs["encounters"],
@@ -193,12 +194,11 @@ def build_exports(cfg: GenerationConfig, dfs: Dict[str, pd.DataFrame]) -> List[E
         seed=cfg.seed,
     )
 
-    # Diagnostics daily exports: last N days of request_date
+    # Diagnostics: immediate-only (up to today)
     diag_df = dfs["diagnostics"].copy()
     if not diag_df.empty:
         diag_df["request_date"] = pd.to_datetime(diag_df["request_date"]).dt.date
-        diag_start = cfg.end_date - timedelta(days=cfg.diagnostics_export_days - 1)
-        diag_df = diag_df[(diag_df["request_date"] >= diag_start) & (diag_df["request_date"] <= cfg.end_date)]
+        diag_df = diag_df[(diag_df["request_date"] >= cfg.start_date) & (diag_df["request_date"] <= cutoff)]
 
     diagnostics_artifacts = build_diagnostic_orders_exports(diag_df)
 
@@ -279,6 +279,31 @@ def main() -> None:
 
     print("\nWriting staging outputs...")
     write_staging(dfs, artifacts, staging_dir)
+
+    # Build simulation queue (holdback days)
+    print("\nBuilding simulation queue...")
+    cutoff = date.today()
+    sim_queue = build_simulation_queue(
+        encounters_df=dfs["encounters"],
+        referrals_df=dfs["referrals"],
+        diagnoses_df=dfs["diagnoses"],
+        urgent_care_df=dfs["urgent_care"],
+        diagnostics_df=dfs["diagnostics"],
+        patients_df=dfs["patients"],
+        cutoff_date=cutoff,
+        seed=cfg.seed,
+    )
+    print(f"Simulation queue: {len(sim_queue)} days staged")
+
+    # Write simulation queue CSVs to local staging for publish script to upload
+    sim_queue_dir = staging_dir / "simulation_queue"
+    for day, files in sorted(sim_queue.items()):
+        day_dir = sim_queue_dir / f"day={day.isoformat()}"
+        day_dir.mkdir(parents=True, exist_ok=True)
+        for filename, df in files.items():
+            df.to_csv(day_dir / filename, index=False)
+
+    print(f"  written to: {sim_queue_dir.resolve()}")
 
     print("\nDone.")
 
