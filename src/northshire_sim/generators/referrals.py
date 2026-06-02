@@ -8,24 +8,11 @@ import numpy as np
 import pandas as pd
 
 
-def random_dates(rng, n: int, start, end):
-    """
-    Return n random dates between start and end (inclusive-ish).
-    start, end: strings or Timestamps ('2020-01-01')
-    """
-    start = pd.to_datetime(start)
-    end = pd.to_datetime(end)
-    days = (end - start).days
-    offsets = rng.integers(0, days + 1, size=n)
-    return start + pd.to_timedelta(offsets, unit="D")
-
 
 def generate_referrals(
     encounters_df: pd.DataFrame,
     providers_df: pd.DataFrame,
     seed: int,
-    start="2023-01-01",
-    end="2024-12-31",
 ) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
 
@@ -63,7 +50,9 @@ def generate_referrals(
             "status",
         ])
 
-    referral_dates = random_dates(rng, n, start, end)
+    enc_dates = pd.to_datetime(sampled["encounter_datetime_start"])
+    offset_days = rng.integers(-7, 1, size=n)
+    referral_dates = enc_dates + pd.to_timedelta(offset_days, unit="D")
     target_provider_ids = rng.choice(targetable["provider_id"].tolist(), size=n)
 
     referral_type = rng.choice(referral_types, size=n, p=referral_probs)
