@@ -460,7 +460,7 @@ class NorthshireTrustStack(Stack):
             "SimulateDailyDrop",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="handler.handler",
-            code=_lambda.Code.from_asset("lambda/simulate_daily_drop"),
+            code=_lambda.Code.from_asset("../lambda/simulate_daily_drop"),
             timeout=Duration.minutes(5),
             memory_size=256,
             environment={
