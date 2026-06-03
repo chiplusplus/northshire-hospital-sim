@@ -454,6 +454,14 @@ class NorthshireTrustStack(Stack):
             ],
         )
 
+        # ── Secrets Manager Interface Endpoint (Lambda needs this to read RDS credentials) ──
+        vpc.add_interface_endpoint(
+            "SecretsManagerEndpoint",
+            service=ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+            subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
+            private_dns_enabled=True,
+        )
+
         # ── Simulation Lambda ─────────────────────────────────────────────────
         simulate_fn = _lambda.Function(
             self,
