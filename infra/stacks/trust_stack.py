@@ -460,7 +460,16 @@ class NorthshireTrustStack(Stack):
             "SimulateDailyDrop",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="handler.handler",
-            code=_lambda.Code.from_asset("../lambda/simulate_daily_drop"),
+            code=_lambda.Code.from_asset(
+                "../lambda/simulate_daily_drop",
+                bundling=cdk.BundlingOptions(
+                    image=_lambda.Runtime.PYTHON_3_12.bundling_image,
+                    command=[
+                        "bash", "-c",
+                        "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",
+                    ],
+                ),
+            ),
             timeout=Duration.minutes(5),
             memory_size=256,
             environment={
