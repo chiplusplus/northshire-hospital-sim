@@ -466,7 +466,9 @@ class NorthshireTrustStack(Stack):
                     image=_lambda.Runtime.PYTHON_3_12.bundling_image,
                     command=[
                         "bash", "-c",
-                        "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",
+                        "pip install -r requirements.txt "
+                        "--platform manylinux2014_x86_64 --only-binary=:all: "
+                        "-t /asset-output && cp -au . /asset-output",
                     ],
                 ),
             ),
