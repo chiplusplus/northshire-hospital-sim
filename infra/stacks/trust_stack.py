@@ -467,7 +467,7 @@ class NorthshireTrustStack(Stack):
             self,
             "SimulateLambdaSg",
             vpc=vpc,
-            description="Simulation Lambda — outbound to RDS, S3, and Secrets Manager",
+            description="Simulation Lambda - outbound to RDS, S3, and Secrets Manager",
             allow_all_outbound=False,
         )
         simulate_sg.add_egress_rule(
