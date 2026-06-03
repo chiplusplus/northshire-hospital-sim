@@ -462,6 +462,30 @@ class NorthshireTrustStack(Stack):
             private_dns_enabled=True,
         )
 
+        # ── Simulation Lambda SG ──────────────────────────────────────────────
+        simulate_sg = ec2.SecurityGroup(
+            self,
+            "SimulateLambdaSg",
+            vpc=vpc,
+            description="Simulation Lambda — outbound to RDS, S3, and Secrets Manager",
+            allow_all_outbound=False,
+        )
+        simulate_sg.add_egress_rule(
+            ec2.Peer.ipv4(vpc.vpc_cidr_block),
+            ec2.Port.tcp(443),
+            "HTTPS to VPC endpoints (Secrets Manager)",
+        )
+        simulate_sg.add_egress_rule(
+            ec2.Peer.ipv4(vpc.vpc_cidr_block),
+            ec2.Port.tcp(5432),
+            "PostgreSQL to RDS",
+        )
+        rds_sg.add_ingress_rule(
+            simulate_sg,
+            ec2.Port.tcp(5432),
+            "Allow simulation Lambda to connect to RDS",
+        )
+
         # ── Simulation Lambda ─────────────────────────────────────────────────
         simulate_fn = _lambda.Function(
             self,
@@ -494,7 +518,7 @@ class NorthshireTrustStack(Stack):
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
-            security_groups=[rds_sg],
+            security_groups=[simulate_sg],
         )
 
         trust_exports_bucket.grant_read_write(simulate_fn)
