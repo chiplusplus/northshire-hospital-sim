@@ -38,7 +38,17 @@ def _resolve_rds_dsn() -> str:
     if not host or not secret_arn:
         return ""
 
+    import socket
+
+    logger.info("Resolving secretsmanager endpoint DNS...")
+    try:
+        ips = socket.getaddrinfo("secretsmanager.eu-west-2.amazonaws.com", 443)
+        logger.info("DNS resolved: %s", ips[0][4][0])
+    except Exception as e:
+        logger.error("DNS resolution failed: %s", e)
+
     sm = boto3.client("secretsmanager")
+    logger.info("Calling GetSecretValue for %s", secret_arn)
     resp = sm.get_secret_value(SecretId=secret_arn)
     secret = json.loads(resp["SecretString"])
 
