@@ -211,19 +211,27 @@ def build_exports(cfg: GenerationConfig, dfs: Dict[str, pd.DataFrame]) -> List[E
     return [*appointment_artifacts, *diagnostics_artifacts, provider_excel]
 
 
+def _filter_to_cutoff(df: pd.DataFrame, date_col: str, cutoff: date) -> pd.DataFrame:
+    """Keep only rows where date_col <= cutoff. Holdback rows go to the simulation queue."""
+    filtered = df.copy()
+    filtered[date_col] = pd.to_datetime(filtered[date_col])
+    return filtered[filtered[date_col].dt.date <= cutoff]
+
+
 def write_staging(dfs: Dict[str, pd.DataFrame], artifacts: List[ExportArtifact], staging_dir: Path) -> None:
     core_dir = staging_dir / "core"
     exports_dir = staging_dir / "exports"
+    cutoff = date.today()
 
-    # Core CSVs
+    # Core CSVs — filtered to exclude holdback days (those go to simulation queue only)
     write_csv(dfs["patients"], core_dir / "patients.csv")
     write_csv(dfs["providers"], core_dir / "providers.csv")
     write_csv(dfs["clinicians"], core_dir / "clinicians.csv")
-    write_csv(dfs["encounters"], core_dir / "encounters.csv")
-    write_csv(dfs["referrals"], core_dir / "referrals.csv")
-    write_csv(dfs["diagnoses"], core_dir / "diagnoses.csv")
-    write_csv(dfs["diagnostics"], core_dir / "diagnostics.csv")
-    write_csv(dfs["urgent_care"], core_dir / "urgent_care_logs.csv")
+    write_csv(_filter_to_cutoff(dfs["encounters"], "encounter_datetime_start", cutoff), core_dir / "encounters.csv")
+    write_csv(_filter_to_cutoff(dfs["referrals"], "referral_datetime", cutoff), core_dir / "referrals.csv")
+    write_csv(_filter_to_cutoff(dfs["diagnoses"], "clinical_datetime", cutoff), core_dir / "diagnoses.csv")
+    write_csv(_filter_to_cutoff(dfs["diagnostics"], "request_date", cutoff), core_dir / "diagnostics.csv")
+    write_csv(_filter_to_cutoff(dfs["urgent_care"], "arrival_datetime", cutoff), core_dir / "urgent_care_logs.csv")
 
     # Export artifacts (appointments/diagnostics/providers)
     written = [write_artifact(a, exports_dir) for a in artifacts]
