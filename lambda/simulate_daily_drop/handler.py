@@ -90,7 +90,8 @@ def handler(event: dict, context: Any) -> dict:
             _publish_to_rds(s3, trust_bucket, day_files[ehr_file], rds_dsn, "ehr")
 
     if "urgent_care_logs.csv" in day_files:
-        _publish_to_rds(s3, trust_bucket, day_files["urgent_care_logs.csv"], rds_dsn, "urgent_care")
+        uc_dsn = rds_dsn.rsplit("/", 1)[0] + "/urgent_care" if rds_dsn else ""
+        _publish_to_rds(s3, trust_bucket, day_files["urgent_care_logs.csv"], uc_dsn, "urgent_care")
 
     if "diagnostic_orders.csv" in day_files:
         _publish_diagnostics(s3, trust_bucket, day_files["diagnostic_orders.csv"], diagnostics_prefix, date_nodash)
