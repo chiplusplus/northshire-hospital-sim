@@ -273,10 +273,26 @@ def main() -> None:
         run([sys.executable, "scripts/generate_data.py", "--staging-dir", "data/staging"],
             cwd=REPO_ROOT)
 
-    # ── 8. Publish ─────────────────────────────────────────────────────────────
+    # ── 8. Clear old Trust S3 data + publish fresh ─────────────────────────────
     step("Publishing data")
     sources = str(REPO_ROOT / "config/sources.yaml")
     staging  = str(REPO_ROOT / "data/staging")
+
+    # Clear old exports so stale data doesn't linger
+    trust_bucket = outputs.get("TrustExportsBucketName", "")
+    if trust_bucket:
+        s3_client = session.client("s3")
+        for prefix in ["diagnostics/", "sftp-incoming/", "_simulation_queue/", "providers/"]:
+            paginator = s3_client.get_paginator("list_objects_v2")
+            keys = []
+            for page in paginator.paginate(Bucket=trust_bucket, Prefix=prefix):
+                keys.extend({"Key": obj["Key"]} for obj in page.get("Contents", []))
+            if keys:
+                for i in range(0, len(keys), 1000):
+                    s3_client.delete_objects(Bucket=trust_bucket, Delete={"Objects": keys[i:i + 1000]})
+                ok(f"Cleared s3://{trust_bucket}/{prefix} ({len(keys)} objects)")
+            else:
+                ok(f"s3://{trust_bucket}/{prefix} already empty")
 
     run([sys.executable, "scripts/publish_ehr.py",
          "--sources", sources, "--staging-core", f"{staging}/core"], cwd=REPO_ROOT)
