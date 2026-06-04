@@ -274,6 +274,11 @@ def main() -> None:
 
     staging_dir = Path(args.staging_dir)
 
+    if staging_dir.exists():
+        import shutil
+        shutil.rmtree(staging_dir)
+        print(f"\nCleared existing staging: {staging_dir}")
+
     print("\nGenerating core datasets...")
     dfs = generate_core(cfg)
 
