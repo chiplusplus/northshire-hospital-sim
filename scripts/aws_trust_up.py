@@ -296,6 +296,10 @@ def main() -> None:
              "--sources", sources, "--staging-exports", f"{staging}/exports"], cwd=REPO_ROOT)
         ok("SFTP exports published")
 
+    run([sys.executable, "scripts/publish_simulation_queue.py",
+         "--sources", sources, "--staging-dir", f"{staging}/simulation_queue"], cwd=REPO_ROOT)
+    ok("Simulation queue published")
+
     # ── Done ───────────────────────────────────────────────────────────────────
     step("Trust environment ready")
     print(f"\n  RDS endpoint : {rds_endpoint}")
