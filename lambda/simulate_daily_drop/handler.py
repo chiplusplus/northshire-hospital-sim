@@ -47,10 +47,7 @@ def handler(event: dict, context: Any) -> dict:
     diagnostics_prefix = event.get("diagnostics_prefix") or os.environ.get("DIAGNOSTICS_PREFIX", "diagnostics")
     rds_dsn = event.get("rds_dsn") or _build_rds_dsn()
 
-    logger.info("Handler start: bucket=%s, rds_dsn=%s", trust_bucket, "set" if rds_dsn else "empty")
-
     s3 = boto3.client("s3")
-    logger.info("S3 client created, listing queue...")
 
     # 1. List all objects in the queue
     resp = s3.list_objects_v2(Bucket=trust_bucket, Prefix=f"{queue_prefix}/day=")
