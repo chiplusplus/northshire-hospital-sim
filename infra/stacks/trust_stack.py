@@ -459,13 +459,18 @@ class NorthshireTrustStack(Stack):
             self,
             "SimulateLambdaSg",
             vpc=vpc,
-            description="Simulation Lambda - outbound to RDS, S3, and Secrets Manager",
+            description="Simulation Lambda - outbound to RDS and S3",
             allow_all_outbound=False,
         )
         simulate_sg.add_egress_rule(
             ec2.Peer.ipv4(vpc.vpc_cidr_block),
             ec2.Port.tcp(5432),
             "PostgreSQL to RDS",
+        )
+        simulate_sg.add_egress_rule(
+            ec2.Peer.any_ipv4(),
+            ec2.Port.tcp(443),
+            "HTTPS to S3 via gateway endpoint",
         )
         rds_sg.add_ingress_rule(
             simulate_sg,
