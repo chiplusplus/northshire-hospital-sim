@@ -146,7 +146,7 @@ def _publish_to_rds(s3, bucket: str, source_key: str, rds_dsn: str, db_name: str
         placeholders = ", ".join(["%s"] * len(columns))
         col_names = ", ".join(f'"{c}"' for c in columns)
 
-        insert_sql = f'INSERT INTO "{table}" ({col_names}) VALUES ({placeholders})'
+        insert_sql = f'INSERT INTO "{table}" ({col_names}) VALUES ({placeholders}) ON CONFLICT DO NOTHING'
 
         for row in rows:
             cursor.execute(insert_sql, [row[c] for c in columns])
