@@ -454,14 +454,6 @@ class NorthshireTrustStack(Stack):
             ],
         )
 
-        # ── Secrets Manager Interface Endpoint (Lambda needs this to read RDS credentials) ──
-        vpc.add_interface_endpoint(
-            "SecretsManagerEndpoint",
-            service=ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-            subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
-            private_dns_enabled=True,
-        )
-
         # ── Simulation Lambda SG ──────────────────────────────────────────────
         simulate_sg = ec2.SecurityGroup(
             self,
@@ -469,11 +461,6 @@ class NorthshireTrustStack(Stack):
             vpc=vpc,
             description="Simulation Lambda - outbound to RDS, S3, and Secrets Manager",
             allow_all_outbound=False,
-        )
-        simulate_sg.add_egress_rule(
-            ec2.Peer.ipv4(vpc.vpc_cidr_block),
-            ec2.Port.tcp(443),
-            "HTTPS to VPC endpoints (Secrets Manager)",
         )
         simulate_sg.add_egress_rule(
             ec2.Peer.ipv4(vpc.vpc_cidr_block),
