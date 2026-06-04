@@ -2,13 +2,16 @@
 
 Reads the earliest day=YYYY-MM-DD folder from _simulation_queue/,
 publishes each file to its destination, then deletes the consumed folder.
+
+TODO (production hardening): RDS credentials are currently passed via
+environment variables. Move to Secrets Manager retrieval once the VPC
+endpoint connectivity issue is resolved.
 """
 
 from __future__ import annotations
 
 import csv
 import io
-import json
 import logging
 import os
 import re
@@ -22,41 +25,19 @@ logger.setLevel(logging.INFO)
 
 DAY_PATTERN = re.compile(r"day=(\d{4}-\d{2}-\d{2})/")
 
-_cached_dsn: str | None = None
 
-
-def _resolve_rds_dsn() -> str:
-    """Build a DSN from RDS_HOST/RDS_PORT env vars + admin credentials from Secrets Manager."""
-    global _cached_dsn
-    if _cached_dsn:
-        return _cached_dsn
-
+def _build_rds_dsn() -> str:
+    """Build DSN from environment variables."""
     host = os.environ.get("RDS_HOST", "")
     port = os.environ.get("RDS_PORT", "5432")
-    secret_arn = os.environ.get("RDS_SECRET_ARN", "")
+    user = os.environ.get("RDS_USER", "")
+    password = os.environ.get("RDS_PASSWORD", "")
+    dbname = os.environ.get("RDS_DBNAME", "ehr")
 
-    if not host or not secret_arn:
+    if not host or not user:
         return ""
 
-    import socket
-
-    logger.info("Resolving secretsmanager endpoint DNS...")
-    try:
-        ips = socket.getaddrinfo("secretsmanager.eu-west-2.amazonaws.com", 443)
-        logger.info("DNS resolved: %s", ips[0][4][0])
-    except Exception as e:
-        logger.error("DNS resolution failed: %s", e)
-
-    sm = boto3.client("secretsmanager")
-    logger.info("Calling GetSecretValue for %s", secret_arn)
-    resp = sm.get_secret_value(SecretId=secret_arn)
-    secret = json.loads(resp["SecretString"])
-
-    _cached_dsn = (
-        f"postgresql://{secret['username']}:{secret['password']}"
-        f"@{host}:{port}/{secret.get('dbname', 'ehr')}"
-    )
-    return _cached_dsn
+    return f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
 
 
 def handler(event: dict, context: Any) -> dict:
@@ -64,9 +45,9 @@ def handler(event: dict, context: Any) -> dict:
     queue_prefix = event.get("queue_prefix", "_simulation_queue")
     sftp_prefix = event.get("sftp_prefix") or os.environ.get("SFTP_PREFIX", "sftp-incoming/outbound/appointments")
     diagnostics_prefix = event.get("diagnostics_prefix") or os.environ.get("DIAGNOSTICS_PREFIX", "diagnostics")
-    rds_dsn = event.get("rds_dsn") or _resolve_rds_dsn()
+    rds_dsn = event.get("rds_dsn") or _build_rds_dsn()
 
-    s3 = _s3_client()
+    s3 = boto3.client("s3")
 
     # 1. List all objects in the queue
     resp = s3.list_objects_v2(Bucket=trust_bucket, Prefix=f"{queue_prefix}/day=")
@@ -118,10 +99,6 @@ def handler(event: dict, context: Any) -> dict:
 
     logger.info("Day %s published and cleaned up", target_day)
     return {"status": "published", "day": target_day, "files": list(day_files.keys())}
-
-
-def _s3_client():
-    return boto3.client("s3")
 
 
 def _publish_appointments(s3, bucket: str, source_key: str, sftp_prefix: str, date_nodash: str) -> None:

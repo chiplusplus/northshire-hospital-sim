@@ -512,7 +512,12 @@ class NorthshireTrustStack(Stack):
                 "DIAGNOSTICS_PREFIX": "diagnostics",
                 "RDS_HOST": db_instance.db_instance_endpoint_address,
                 "RDS_PORT": db_instance.db_instance_endpoint_port,
-                "RDS_SECRET_ARN": db_instance.secret.secret_arn,
+                # RDS_USER and RDS_PASSWORD are injected by session.sh after
+                # fetching from Secrets Manager. TODO: move to runtime Secrets
+                # Manager retrieval once VPC endpoint issue is resolved.
+                "RDS_USER": "",
+                "RDS_PASSWORD": "",
+                "RDS_DBNAME": "ehr",
             },
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(
@@ -522,7 +527,6 @@ class NorthshireTrustStack(Stack):
         )
 
         trust_exports_bucket.grant_read_write(simulate_fn)
-        db_instance.secret.grant_read(simulate_fn)
 
         # EventBridge rule — deployed DISABLED, enabled by session.sh after
         # Platform is ready
