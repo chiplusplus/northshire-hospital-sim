@@ -1,0 +1,114 @@
+services:
+  # -----------------------------
+  # EHR INTERNAL DATABASE
+  # -----------------------------
+  ehr_internal:
+    image: postgres:16
+    container_name: ehr_internal
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ehr
+      POSTGRES_USER: ehr_admin
+      POSTGRES_PASSWORD: ehr_admin_pw
+    ports:
+      - "5433:5432"
+    volumes:
+      - ehr_internal_data:/var/lib/postgresql/data
+      - ./sql/ehr/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ehr_admin -d ehr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------------
+  # EHR MIRROR DATABASE
+  # -----------------------------
+  ehr_mirror:
+    image: postgres:16
+    container_name: ehr_mirror
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ehr_mirror
+      POSTGRES_USER: mirror_admin
+      POSTGRES_PASSWORD: mirror_admin_pw
+    ports:
+      - "5434:5432"
+    volumes:
+      - ehr_mirror_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mirror_admin -d ehr_mirror"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------------
+  # URGENT CARE INTERNAL DATABASE
+  # -----------------------------
+  urgent_internal:
+    image: postgres:16
+    container_name: urgent_internal
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: urgent_care
+      POSTGRES_USER: urgent_admin
+      POSTGRES_PASSWORD: urgent_admin_pw
+    ports:
+      - "5435:5432"
+    volumes:
+      - urgent_internal_data:/var/lib/postgresql/data
+      - ./sql/urgent_care/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urgent_admin -d urgent_care"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------------
+  # URGENT CARE MIRROR DATABASE
+  # -----------------------------
+  urgent_mirror:
+    image: postgres:16
+    container_name: urgent_mirror
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: urgent_care_mirror
+      POSTGRES_USER: mirror_admin
+      POSTGRES_PASSWORD: mirror_admin_pw
+    ports:
+      - "5436:5432"
+    volumes:
+      - urgent_mirror_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mirror_admin -d urgent_care_mirror"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------------
+  # SFTP SERVER
+  # -----------------------------
+  sftp:
+    image: atmoz/sftp:alpine
+    container_name: northshire_sftp
+    ports:
+      - "2222:22"
+    volumes:
+      - ./data/sftp_drop:/home/trust_sftp/upload
+    command: >
+      trust_sftp:trust_sftp_pw:1001:1001:upload
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 22 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# -----------------------------
+# VOLUMES
+# -----------------------------
+volumes:
+  ehr_internal_data:
+  ehr_mirror_data:
+  urgent_internal_data:
+  urgent_mirror_data:

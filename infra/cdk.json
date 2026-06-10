@@ -1,0 +1,16 @@
+{
+  "app": "python3 app.py",
+  "watch": {
+    "include": ["**"],
+    "exclude": ["README.md", "cdk*.json", "**/__pycache__/**", "**/*.pyc"]
+  },
+  "context": {
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:stackRelativeExports": true,
+    "@aws-cdk/aws-rds:lowercaseDbIdentifier": false,
+    "trustRegion": "eu-west-2",
+    "trustCidr": "10.0.0.0/16",
+    "platformCidr": "10.10.0.0/16",
+    "deployTransferFamily": true
+  }
+}

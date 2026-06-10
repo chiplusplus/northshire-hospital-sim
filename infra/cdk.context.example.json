@@ -1,0 +1,10 @@
+{
+  "availability-zones:account=<TRUST_ACCOUNT_ID>:region=eu-west-2": [
+    "eu-west-2a",
+    "eu-west-2b",
+    "eu-west-2c"
+  ],
+  "platformAccountId": "<PLATFORM_ACCOUNT_ID>",
+  "platformVpcId": "<PLATFORM_VPC_ID>",
+  "peeringConnectionId": "<PEERING_CONNECTION_ID>"
+}

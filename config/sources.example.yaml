@@ -1,0 +1,87 @@
+# -------------------------------------------------------------------
+# Example connection & destination configuration for Northshire Trust
+#
+# INSTRUCTIONS:
+# 1. Copy this file to `config/sources.yaml`
+# 2. Replace ALL values wrapped in <ANGLE_BRACKETS>
+# 3. Do NOT commit real credentials
+# -------------------------------------------------------------------
+
+postgres:
+  # -----------------------------------------------------------------
+  # Internal transactional databases (Trust-managed)
+  # These DSNs are used by the simulator to load internal systems.
+  # -----------------------------------------------------------------
+
+  ehr_internal_dsn: "postgresql+psycopg2://<EHR_ADMIN_USER>:<EHR_ADMIN_PASSWORD>@localhost:5433/ehr"
+  urgent_internal_dsn: "postgresql+psycopg2://<URGENT_ADMIN_USER>:<URGENT_ADMIN_PASSWORD>@localhost:5435/urgent_care"
+
+  # -----------------------------------------------------------------
+  # Admin connections to the mirror databases.
+  # Used by the publishing scripts to CREATE tables and COPY data in.
+  # The Platform (access-iq) uses its own config with the read-only
+  # credentials; these are NOT the same as the access-iq DSNs.
+  # -----------------------------------------------------------------
+
+  ehr_mirror_dsn: "postgresql+psycopg2://<ADMIN_USER>:<ADMIN_PASSWORD>@localhost:5433/ehr_mirror"
+  urgent_mirror_dsn: "postgresql+psycopg2://<ADMIN_USER>:<ADMIN_PASSWORD>@localhost:5433/urgent_care_mirror"
+
+sftp:
+  # -----------------------------------------------------------------
+  # Secure file transfer endpoint for outbound appointment exports
+  # -----------------------------------------------------------------
+
+  host: "localhost"
+  port: 2222
+
+  # Credentials used by access-iq to pull appointment CSVs
+  username: "<SFTP_USERNAME>"
+  password: "<SFTP_PASSWORD>"
+
+  # Root directory where outbound feeds are dropped
+  outbound_root: "/upload/outbound"
+
+s3:
+  # -----------------------------------------------------------------
+  # Trust-owned S3 configuration
+  # Publishing scripts will refuse to run if these are misconfigured.
+  # -----------------------------------------------------------------
+
+  # AWS region where Trust buckets are hosted
+  region: "eu-west-2"
+
+  # Named IAM profile configured locally via:
+  #   aws configure --profile <PROFILE_NAME>
+  profile: "<AWS_PROFILE_NAME>"
+
+  # Safety check: publishing will fail if the active AWS account does not match
+  expected_account_id: "<AWS_ACCOUNT_ID>"
+
+  # -----------------------------------------------------------------
+  # Optional (recommended): assume a scoped Trust role for publishing
+  # -----------------------------------------------------------------
+
+  assume_role_arn: "arn:aws:iam::<AWS_ACCOUNT_ID>:role/<TRUST_PUBLISHER_ROLE_NAME>"
+  assume_role_session_name: "northshire-hospital-sim"
+
+  # -----------------------------------------------------------------
+  # Advanced / optional settings
+  # -----------------------------------------------------------------
+
+  # Set only if using a non-AWS endpoint (e.g. LocalStack)
+  endpoint_url: null
+
+  # Server-side encryption options
+  use_sse_s3: true
+  kms_key_id: null
+
+  # -----------------------------------------------------------------
+  # Trust-owned bucket and key prefixes
+  # A single bucket hosts both diagnostics and provider reference exports.
+  # -----------------------------------------------------------------
+
+  bucket: "<TRUST_EXPORTS_BUCKET_NAME>"
+
+  prefixes:
+    diagnostics: "diagnostics"
+    providers: "providers"
